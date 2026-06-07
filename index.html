@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clipes Ocultos — Vídeos que Você Nunca Viu</title>
+  <meta name="description" content="Descubra vídeos raros, curiosos e surpreendentes. Clipes Ocultos traz o que as grandes plataformas escondem." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── INTRO CINEMATIC ── -->
+  <div id="intro">
+    <canvas id="intro-canvas"></canvas>
+    <div class="intro-content">
+      <div class="intro-logo">
+        <span class="eye-icon">◉</span>
+        <h1 class="intro-title">CLIPES<br/><em>OCULTOS</em></h1>
+      </div>
+      <p class="intro-sub">Vídeos que o mundo tentou esconder</p>
+      <button id="enter-btn" class="btn-enter">
+        <span>ENTRAR</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="intro-scanlines"></div>
+    <div class="intro-vignette"></div>
+  </div>
+
+  <!-- ── SITE PRINCIPAL ── -->
+  <div id="main-site" class="hidden">
+
+    <!-- NAV -->
+    <nav id="navbar">
+      <div class="nav-container">
+        <a href="#" class="nav-logo">
+          <span class="eye-icon-sm">◉</span>
+          <span>CLIPES <strong>OCULTOS</strong></span>
+        </a>
+        <div class="nav-links">
+          <a href="#inicio">Início</a>
+          <a href="#categorias">Categorias</a>
+          <a href="#em-alta">Em Alta</a>
+          <a href="#recentes">Recentes</a>
+          <a href="#sobre">Sobre</a>
+        </div>
+        <button class="nav-search-btn" id="searchToggle" aria-label="Buscar">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="search-bar" id="searchBar">
+        <input type="text" placeholder="Buscar vídeos, temas, categorias…" id="searchInput" />
+        <button id="searchClose">✕</button>
+      </div>
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#inicio" class="mob-link">Início</a>
+      <a href="#categorias" class="mob-link">Categorias</a>
+      <a href="#em-alta" class="mob-link">Em Alta</a>
+      <a href="#recentes" class="mob-link">Recentes</a>
+      <a href="#sobre" class="mob-link">Sobre</a>
+    </div>
+
+    <!-- HERO -->
+    <section id="inicio" class="hero">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          AO VIVO · NOVO CONTEÚDO
+        </div>
+        <h2 class="hero-title">
+          Vídeos que<br/>
+          <span class="glitch" data-text="Ninguém">Ninguém</span><br/>
+          Mostrou
+        </h2>
+        <p class="hero-desc">Coleção curada de clipes raros, curiosidades visuais e momentos únicos que as grandes plataformas ocultam dos algoritmos.</p>
+        <div class="hero-actions">
+          <a href="#em-alta" class="btn-primary">Ver Em Alta</a>
+          <a href="#categorias" class="btn-ghost">Explorar Categorias</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><strong id="count-videos">0</strong><span>Vídeos</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><strong id="count-views">0</strong><span>Visualizações</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><strong id="count-cats">0</strong><span>Categorias</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="tv-frame">
+          <div class="tv-screen">
+            <div class="tv-noise" id="tvNoise"></div>
+            <div class="featured-video-placeholder">
+              <div class="play-glow">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><polygon points="14,10 34,20 14,30" fill="currentColor"/></svg>
+              </div>
+              <p>CLIPE EM DESTAQUE</p>
+            </div>
+          </div>
+          <div class="tv-base"></div>
+          <div class="tv-leg tv-leg-l"></div>
+          <div class="tv-leg tv-leg-r"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap">
+      <div class="ticker-track" id="tickerTrack">
+        <span>◉ CLIPES OCULTOS</span>
+        <span>· DOCUMENTÁRIOS RAROS ·</span>
+        <span>CÂMERAS ESCONDIDAS</span>
+        <span>· MOMENTOS ÚNICOS ·</span>
+        <span>ARQUIVOS SECRETOS</span>
+        <span>· VÍDEOS PROIBIDOS ·</span>
+        <span>REGISTRO HISTÓRICO</span>
+        <span>· CONTEÚDO EXCLUSIVO ·</span>
+        <span>◉ CLIPES OCULTOS</span>
+        <span>· DOCUMENTÁRIOS RAROS ·</span>
+        <span>CÂMERAS ESCONDIDAS</span>
+        <span>· MOMENTOS ÚNICOS ·</span>
+        <span>ARQUIVOS SECRETOS</span>
+        <span>· VÍDEOS PROIBIDOS ·</span>
+        <span>REGISTRO HISTÓRICO</span>
+        <span>· CONTEÚDO EXCLUSIVO ·</span>
+      </div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <section id="categorias" class="section categories-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Explorar</span>
+          <h2 class="section-title">Categorias</h2>
+          <p class="section-desc">Mergulhe em mundos que poucos conhecem</p>
+        </div>
+        <div class="categories-grid">
+          <div class="cat-card cat-c1">
+            <div class="cat-icon">🎬</div>
+            <h3>Documentários</h3>
+            <p>Histórias reais jamais transmitidas</p>
+            <span class="cat-count">24 vídeos</span>
+          </div>
+          <div class="cat-card cat-c2">
+            <div class="cat-icon">👁️</div>
+            <h3>Câmeras Ocultas</h3>
+            <p>Flagrantes autênticos e reveladores</p>
+            <span class="cat-count">18 vídeos</span>
+          </div>
+          <div class="cat-card cat-c3">
+            <div class="cat-icon">📡</div>
+            <h3>Arquivos Secretos</h3>
+            <p>Gravações de acesso restrito</p>
+            <span class="cat-count">11 vídeos</span>
+          </div>
+          <div class="cat-card cat-c4">
+            <div class="cat-icon">🌍</div>
+            <h3>Mundo Oculto</h3>
+            <p>Lugares e eventos ignorados pela mídia</p>
+            <span class="cat-count">31 vídeos</span>
+          </div>
+          <div class="cat-card cat-c5">
+            <div class="cat-icon">⚡</div>
+            <h3>Momentos Raros</h3>
+            <p>Capturas únicas que desafiam a lógica</p>
+            <span class="cat-count">47 vídeos</span>
+          </div>
+          <div class="cat-card cat-c6">
+            <div class="cat-icon">🔍</div>
+            <h3>Investigações</h3>
+            <p>Jornalismo independente e corajoso</p>
+            <span class="cat-count">9 vídeos</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EM ALTA -->
+    <section id="em-alta" class="section trending-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Trending</span>
+          <h2 class="section-title">Em Alta</h2>
+          <p class="section-desc">Os clipes mais assistidos desta semana</p>
+        </div>
+        <div class="videos-grid" id="trendingGrid">
+
+          <div class="video-card featured-card">
+            <div class="video-thumb">
+              <div class="thumb-placeholder tp1"></div>
+              <div class="video-overlay">
+                <button class="play-btn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg>
+                </button>
+                <span class="video-duration">12:34</span>
+              </div>
+              <span class="trending-badge">#1</span>
+            </div>
+            <div class="video-info">
+              <span class="video-cat">Documentário</span>
+              <h3 class="video-title">O Arquivo que Quase Desapareceu</h3>
+              <p class="video-desc">Gravações recuperadas de um cofre selado por décadas revelam fatos que nenhuma emissora quis transmitir.</p>
+              <div class="video-meta">
+                <span>🔥 142K views</span>
+                <span>· há 2 dias</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <div class="video-thumb">
+              <div class="thumb-placeholder tp2"></div>
+              <div class="video-overlay">
+                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <span class="video-duration">7:18</span>
+              </div>
+              <span class="trending-badge">#2</span>
+            </div>
+            <div class="video-info">
+              <span class="video-cat">Câmera Oculta</span>
+              <h3 class="video-title">Dentro da Sala Proibida</h3>
+              <div class="video-meta"><span>🔥 98K views</span><span>· há 3 dias</span></div>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <div class="video-thumb">
+              <div class="thumb-placeholder tp3"></div>
+              <div class="video-overlay">
+                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <span class="video-duration">4:55</span>
+              </div>
+              <span class="trending-badge">#3</span>
+            </div>
+            <div class="video-info">
+              <span class="video-cat">Momentos Raros</span>
+              <h3 class="video-title">Capturado em 1 em 10 Milhões</h3>
+              <div class="video-meta"><span>🔥 76K views</span><span>· há 5 dias</span></div>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <div class="video-thumb">
+              <div class="thumb-placeholder tp4"></div>
+              <div class="video-overlay">
+                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <span class="video-duration">9:02</span>
+              </div>
+              <span class="trending-badge">#4</span>
+            </div>
+            <div class="video-info">
+              <span class="video-cat">Investigação</span>
+              <h3 class="video-title">A Verdade sobre o Projeto X</h3>
+              <div class="video-meta"><span>🔥 63K views</span><span>· há 1 semana</span></div>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <div class="video-thumb">
+              <div class="thumb-placeholder tp5"></div>
+              <div class="video-overlay">
+                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <span class="video-duration">6:47</span>
+              </div>
+              <span class="trending-badge">#5</span>
+            </div>
+            <div class="video-info">
+              <span class="video-cat">Mundo Oculto</span>
+              <h3 class="video-title">Lugar Sem Nome no Mapa</h3>
+              <div class="video-meta"><span>🔥 55K views</span><span>· há 1 semana</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENTES -->
+    <section id="recentes" class="section recents-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Novo</span>
+          <h2 class="section-title">Adicionados Recentemente</h2>
+          <p class="section-desc">Fique por dentro do que acabou de chegar</p>
+        </div>
+        <div class="recents-list" id="recentsList">
+
+          <article class="recent-item">
+            <div class="recent-thumb">
+              <div class="thumb-placeholder tp6"></div>
+              <span class="video-duration">3:21</span>
+            </div>
+            <div class="recent-info">
+              <span class="video-cat">Arquivo Secreto</span>
+              <h3>Transmissão Interceptada — 1987</h3>
+              <p>Sinal captado por radioamador durante conferência sigilosa.</p>
+              <div class="video-meta"><span>12K views</span><span>· há 1 hora</span></div>
+            </div>
+          </article>
+
+          <article class="recent-item">
+            <div class="recent-thumb">
+              <div class="thumb-placeholder tp7"></div>
+              <span class="video-duration">5:08</span>
+            </div>
+            <div class="recent-info">
+              <span class="video-cat">Câmera Oculta</span>
+              <h3>O que Acontece às 3h da Manhã</h3>
+              <p>Câmera de segurança registra sequência impossível de explicar.</p>
+              <div class="video-meta"><span>8.4K views</span><span>· há 4 horas</span></div>
+            </div>
+          </article>
+
+          <article class="recent-item">
+            <div class="recent-thumb">
+              <div class="thumb-placeholder tp8"></div>
+              <span class="video-duration">11:15</span>
+            </div>
+            <div class="recent-info">
+              <span class="video-cat">Documentário</span>
+              <h3>Subterrâneos Esquecidos da Cidade</h3>
+              <p>Exploração de túneis abandonados que nenhum mapa oficial registra.</p>
+              <div class="video-meta"><span>21K views</span><span>· há 6 horas</span></div>
+            </div>
+          </article>
+
+          <article class="recent-item">
+            <div class="recent-thumb">
+              <div class="thumb-placeholder tp9"></div>
+              <span class="video-duration">2:44</span>
+            </div>
+            <div class="recent-info">
+              <span class="video-cat">Momentos Raros</span>
+              <h3>Fenômeno Atmosférico Jamais Catalogado</h3>
+              <p>Pesquisadores estão intrigados com as imagens capturadas ao amanhecer.</p>
+              <div class="video-meta"><span>5.1K views</span><span>· há 8 horas</span></div>
+            </div>
+          </article>
+
+          <article class="recent-item">
+            <div class="recent-thumb">
+              <div class="thumb-placeholder tp10"></div>
+              <span class="video-duration">8:33</span>
+            </div>
+            <div class="recent-info">
+              <span class="video-cat">Investigação</span>
+              <h3>Empresa Fantasma: Quem Está Por Trás?</h3>
+              <p>Reportagem independente rastreia operações de empresa sem endereço físico.</p>
+              <div class="video-meta"><span>33K views</span><span>· há 12 horas</span></div>
+            </div>
+          </article>
+
+          <article class="recent-item">
+            <div class="recent-thumb">
+              <div class="thumb-placeholder tp11"></div>
+              <span class="video-duration">4:19</span>
+            </div>
+            <div class="recent-info">
+              <span class="video-cat">Mundo Oculto</span>
+              <h3>Aldeia Sem Internet — Vida Real</h3>
+              <p>Comunidade isolada mantém tradições que o mundo moderno não conhece.</p>
+              <div class="video-meta"><span>19K views</span><span>· há 1 dia</span></div>
+            </div>
+          </article>
+
+        </div>
+        <div class="load-more-wrap">
+          <button class="btn-load-more" id="loadMore">Carregar Mais Vídeos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="newsletter-section">
+      <div class="container">
+        <div class="newsletter-box">
+          <div class="nl-eye">◉</div>
+          <h2>Não Perca Nenhum Clipe</h2>
+          <p>Receba alertas quando novos vídeos forem publicados. Sem spam, só conteúdo que realmente vale.</p>
+          <div class="nl-form">
+            <input type="email" placeholder="seu@email.com" id="nlEmail" />
+            <button class="btn-nl" id="nlBtn">Inscrever</button>
+          </div>
+          <p class="nl-note" id="nlNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOBRE -->
+    <section id="sobre" class="section about-section">
+      <div class="container">
+        <div class="about-grid">
+          <div class="about-visual">
+            <div class="about-3d-card">
+              <div class="card-inner">
+                <div class="card-face card-front">
+                  <span class="big-eye">◉</span>
+                  <p>CLIPES<br/><strong>OCULTOS</strong></p>
+                </div>
+                <div class="card-face card-back">
+                  <p>Conteúdo<br/>que o mundo<br/>tentou esconder</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="about-text">
+            <span class="section-tag">Manifesto</span>
+            <h2 class="section-title">Sobre o Projeto</h2>
+            <p>Clipes Ocultos nasceu da necessidade de preservar e compartilhar vídeos que os algoritmos das grandes plataformas deliberadamente enterram.</p>
+            <p>Aqui não há patrocinadores, não há agenda corporativa. Apenas curadoria honesta de conteúdo que merece ser visto.</p>
+            <div class="about-values">
+              <div class="value-item">
+                <span>◉</span>
+                <div><strong>Independência</strong><p>Sem influência editorial externa</p></div>
+              </div>
+              <div class="value-item">
+                <span>◉</span>
+                <div><strong>Autenticidade</strong><p>Apenas vídeos verificados e originais</p></div>
+              </div>
+              <div class="value-item">
+                <span>◉</span>
+                <div><strong>Transparência</strong><p>Fontes sempre identificadas</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a href="#" class="nav-logo">
+              <span class="eye-icon-sm">◉</span>
+              <span>CLIPES <strong>OCULTOS</strong></span>
+            </a>
+            <p>Preservando o que o mundo tenta apagar.</p>
+          </div>
+          <div class="footer-links">
+            <h4>Navegação</h4>
+            <a href="#inicio">Início</a>
+            <a href="#categorias">Categorias</a>
+            <a href="#em-alta">Em Alta</a>
+            <a href="#recentes">Recentes</a>
+            <a href="#sobre">Sobre</a>
+          </div>
+          <div class="footer-links">
+            <h4>Legal</h4>
+            <a href="#">Política de Privacidade</a>
+            <a href="#">Termos de Uso</a>
+            <a href="#">DMCA</a>
+            <a href="#">Contato</a>
+          </div>
+          <div class="footer-social">
+            <h4>Seguir</h4>
+            <div class="social-icons">
+              <a href="#" aria-label="YouTube" class="social-link">▶</a>
+              <a href="#" aria-label="Telegram" class="social-link">✈</a>
+              <a href="#" aria-label="Instagram" class="social-link">◈</a>
+              <a href="#" aria-label="Twitter/X" class="social-link">✕</a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2025 Clipes Ocultos · Todos os direitos reservados.</p>
+          <p class="footer-credit">Feito com 👁️ no Brasil</p>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /main-site -->
+
+  <!-- MODAL DE VÍDEO -->
+  <div id="videoModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-player">
+        <div class="player-placeholder">
+          <div class="player-eye">◉</div>
+          <p>Vídeo em breve</p>
+          <p class="player-sub">Adicione o link do vídeo no código</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCROLL TO TOP -->
+  <button id="scrollTop" class="scroll-top hidden" aria-label="Topo">↑</button>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
