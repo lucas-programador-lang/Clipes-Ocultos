@@ -1,6 +1,78 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js
+   CLIPES OCULTOS — main.js (Firebase Realtime)
 ══════════════════════════════════════════ */
+
+// ── CONEXÃO COM O FIREBASE ───────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// TODO: Substitua pelos dados do seu projeto gerado no Console do Firebase
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
+  projectId: "SEU_PROJETO",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── BANCO DE DADOS LOCAL DOS VÍDEOS MP4 ──────────────────
+// Insira as rotas reais dos seus arquivos .mp4 aqui
+const listaDeVideos = {
+  "v1": { title: "O Arquivo que Quase Desapareceu", url: "videos/arquivo.mp4" },
+  "v2": { title: "Dentro da Sala Proibida", url: "videos/sala.mp4" },
+  "v3": { title: "Capturado em 1 em 10 Milhões", url: "videos/raro.mp4" },
+  "v4": { title: "A Verdade sobre o Projeto X", url: "videos/projeto_x.mp4" },
+  "v5": { title: "Lugar Sem Nome no Mapa", url: "videos/lugar.mp4" },
+  "v6": { title: "Transmissão Interceptada — 1987", url: "videos/1987.mp4" },
+  "v7": { title: "O que Acontece às 3h da Manhã", url: "videos/3am.mp4" },
+  "v8": { title: "Subterrâneos Esquecidos da Cidade", url: "videos/sub.mp4" },
+  "v9": { title: "Fenômeno Atmosférico Jamais Catalogado", url: "videos/fenomeno.mp4" },
+  "v10": { title: "Empresa Fantasma: Quem Está Por Trás?", url: "videos/fantasma.mp4" },
+  "v11": { title: "Aldeia Sem Internet — Vida Real", url: "videos/aldeia.mp4" }
+};
+
+let videoAtivoId = null;
+let viewerRef = null;
+
+// Elementos do Modal Interativo
+const playerVideo = document.getElementById("playerVideoMP4");
+const modalTitle = document.getElementById("modalVideoTitle");
+const countLikesSpan = document.getElementById("countLikes");
+const totalViewsSpan = document.getElementById("totalVideoViews");
+const onlineViewsSpan = document.getElementById("onlineViews");
+const btnLike = document.getElementById("btnLike");
+const btnSendComment = document.getElementById("btnSendComment");
+const inputUser = document.getElementById("commentUser");
+const inputText = document.getElementById("commentText");
+const commentsContainer = document.getElementById("commentsContainer");
+
+// Ouvinte do Ranking Global (Atualiza a Home baseado nos cliques reais de todos os usuários)
+function monitorarRankingGlobal() {
+  const videosRef = ref(db, 'videos/');
+  onValue(videosRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    let somaViewsGerais = 0;
+    Object.keys(data).forEach(id => {
+      somaViewsGerais += data[id].views || 0;
+    });
+
+    // Injeta a soma real de views de pessoas reais no contador do topo do site
+    const countViewsEl = document.getElementById('count-views');
+    if (countViewsEl) {
+      countViewsEl.textContent = somaViewsGerais >= 1000000 
+        ? (somaViewsGerais / 1000000).toFixed(1) + 'M' 
+        : somaViewsGerais.toLocaleString('pt-BR');
+    }
+  });
+}
+monitorarRankingGlobal();
 
 // ── INTRO CANVAS (particle web) ──────────────────────────
 const introCanvas = document.getElementById('intro-canvas');
@@ -110,7 +182,6 @@ function animateHero() {
   const h = heroCanvas.height;
   hctx.clearRect(0, 0, w, h);
 
-  // Moving grid
   const gridSize = 60;
   const offsetX = (heroTime * 20) % gridSize;
   const offsetY = (heroTime * 10) % gridSize;
@@ -123,7 +194,6 @@ function animateHero() {
     hctx.beginPath(); hctx.moveTo(0, y); hctx.lineTo(w, y); hctx.stroke();
   }
 
-  // Radial glow
   const grad = hctx.createRadialGradient(w * 0.2, h * 0.5, 0, w * 0.2, h * 0.5, w * 0.6);
   grad.addColorStop(0, 'rgba(232,255,60,0.04)');
   grad.addColorStop(1, 'transparent');
@@ -135,7 +205,6 @@ function animateHero() {
 function generateNoise() {
   const tv = document.getElementById('tvNoise');
   if (!tv) return;
-  let t = 0;
   setInterval(() => {
     const size = 80;
     const canvas = document.createElement('canvas');
@@ -152,7 +221,6 @@ function generateNoise() {
     }
     ctx.putImageData(img, 0, 0);
     tv.style.backgroundImage = `url(${canvas.toDataURL()})`;
-    t++;
   }, 80);
 }
 
@@ -160,13 +228,11 @@ function generateNoise() {
 function animateCounters() {
   const targets = {
     'count-videos': 140,
-    'count-views':  '2.1M',
     'count-cats':   6,
   };
   Object.entries(targets).forEach(([id, target]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (typeof target === 'string') { el.textContent = target; return; }
     let current  = 0;
     const step   = Math.ceil(target / 60);
     const timer  = setInterval(() => {
@@ -214,26 +280,131 @@ searchClose.addEventListener('click', () => {
   searchInput.value = '';
 });
 
-// ── VIDEO CARDS → MODAL ──────────────────────────────────
+// ── REALTIME MODAL ENGINE ────────────────────────────────
 const modal         = document.getElementById('videoModal');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalClose    = document.getElementById('modalClose');
 
-function openModal() {
+function openRealtimeVideo(idDoVideo) {
+  const videoInfo = listaDeVideos[idDoVideo];
+  if (!videoInfo) return;
+
+  videoAtivoId = idDoVideo;
+  modalTitle.innerText = videoInfo.title;
+  playerVideo.src = videoInfo.url;
+  
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  modal.classList.add('hidden');
-  document.body.style.overflow = '';
+
+  // 1. Incrementa visualização histórica (Transação segura)
+  const viewsRef = ref(db, `videos/${idDoVideo}/views`);
+  runTransaction(viewsRef, (currentViews) => {
+    return (currentViews || 0) + 1;
+  });
+
+  // 2. Sistema de presença de usuários online assistindo ao mesmo tempo
+  const onlineRef = ref(db, `videos/${idDoVideo}/online/${Date.now()}`);
+  set(onlineRef, true);
+  onDisconnect(onlineRef).remove(); // Se cair ou fechar a aba, apaga o registro do banco
+  viewerRef = onlineRef;
+
+  // 3. Ouvinte contínuo de contadores (Likes, Views e Ativos)
+  const dataRef = ref(db, `videos/${idDoVideo}`);
+  onValue(dataRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      countLikesSpan.innerText = data.likes || 0;
+      totalViewsSpan.innerText = (data.views || 0).toLocaleString('pt-BR');
+      
+      const totalOnline = data.online ? Object.keys(data.online).length : 1;
+      onlineViewsSpan.innerText = totalOnline;
+    }
+  });
+
+  // 4. Fluxo contínuo de Comentários
+  const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
+  onValue(commentsRef, (snapshot) => {
+    commentsContainer.innerHTML = "";
+    const data = snapshot.val();
+    if (data) {
+      Object.keys(data).forEach(key => {
+        const c = data[key];
+        const item = document.createElement("div");
+        item.style.padding = "6px 10px";
+        item.style.background = "#222";
+        item.style.borderRadius = "4px";
+        item.style.fontFamily = "'Space Mono', monospace";
+        item.innerHTML = `<strong style="color: #e8ff3c;">${c.user}:</strong> <span style="font-size:0.9rem;">${c.text}</span>`;
+        commentsContainer.appendChild(item);
+      });
+      commentsContainer.scrollTop = commentsContainer.scrollHeight;
+    } else {
+      commentsContainer.innerHTML = `<p style="color:#666; font-size:0.85rem; font-family:'Space Mono';">Nenhum comentário ainda. Seja o primeiro!</p>`;
+    }
+  });
 }
 
-document.querySelectorAll('.video-card, .recent-item').forEach(card => {
-  card.addEventListener('click', openModal);
+function closeRealtimeVideo() {
+  playerVideo.pause();
+  playerVideo.src = "";
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+
+  // Desconecta o usuário do status de visualização ativa imediatamente
+  if (viewerRef) {
+    set(viewerRef, null);
+    viewerRef = null;
+  }
+  videoAtivoId = null;
+}
+
+// Intercepta os cliques e descobre qual vídeo abrir com base na posição indexada dos elementos
+function mapearBotoesPlay() {
+  document.querySelectorAll('.video-card, .recent-item').forEach((card, index) => {
+    // Remove listeners antigos clonando o nó (evita conflitos e múltiplas execuções)
+    const newCard = card.cloneNode(true);
+    card.parentNode.replaceChild(newCard, card);
+    
+    newCard.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Mapeia v1, v2, v3 seguindo a ordem natural que já existe no HTML
+      openRealtimeVideo(`v${index + 1}`);
+    });
+  });
+}
+
+modalBackdrop.addEventListener('click', closeRealtimeVideo);
+modalClose.addEventListener('click', closeRealtimeVideo);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtimeVideo(); });
+
+// Evento do Botão de Curtir (Like)
+btnLike.addEventListener("click", () => {
+  if (!videoAtivoId) return;
+  const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
+  runTransaction(likesRef, (currentLikes) => {
+    return (currentLikes || 0) + 1;
+  });
 });
-modalBackdrop.addEventListener('click', closeModal);
-modalClose.addEventListener('click', closeModal);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Evento para Enviar um Comentário Novo
+btnSendComment.addEventListener("click", () => {
+  const nomeStr = inputUser.value.trim() || "Anônimo";
+  const textoStr = inputText.value.trim();
+
+  if (!textoStr || !videoAtivoId) return;
+
+  const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
+  push(commentsListRef, {
+    user: nomeStr,
+    text: textoStr,
+    timestamp: Date.now()
+  });
+
+  inputText.value = "";
+});
+
+// Executa o mapeamento inicial ao carregar a página
+document.addEventListener("DOMContentLoaded", mapearBotoesPlay);
 
 // ── SCROLL TOP ───────────────────────────────────────────
 document.getElementById('scrollTop').addEventListener('click', () => {
@@ -290,8 +461,8 @@ loadMoreBtn.addEventListener('click', () => {
         <h3>${v.title}</h3>
         <div class="video-meta"><span>${v.views} views</span><span>· ${v.time}</span></div>
       </div>`;
-    el.addEventListener('click', openModal);
-    // animate in
+    
+    // Animação de entrada
     el.style.opacity   = '0';
     el.style.transform = 'translateY(16px)';
     list.appendChild(el);
@@ -302,6 +473,9 @@ loadMoreBtn.addEventListener('click', () => {
     });
   });
   loadCount += 2;
+  
+  // Remapeia novos elementos criados no DOM para vincularem ao Firebase
+  mapearBotoesPlay();
 });
 
 // ── CATEGORY CARD HOVER TILT ──────────────────────────────
@@ -319,7 +493,7 @@ document.querySelectorAll('.cat-card').forEach(card => {
   });
 });
 
-// ── INTERSECTION OBSERVER (fade-in sections) ─────────────
+// ── INTERSECTION OBSERVER ────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -330,7 +504,6 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.1 });
 
-// Apply to cards and items after DOM ready
 setTimeout(() => {
   document.querySelectorAll('.cat-card, .video-card, .recent-item').forEach(el => {
     el.style.opacity    = '0';
@@ -340,7 +513,7 @@ setTimeout(() => {
   });
 }, 50);
 
-// ── SMOOTH ANCHOR SCROLL (handle offset for fixed nav) ───
+// ── SMOOTH ANCHOR SCROLL ─────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   link.addEventListener('click', e => {
     const target = document.querySelector(link.getAttribute('href'));
