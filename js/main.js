@@ -1,12 +1,11 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Premium UI & Custom Modals)
+   CLIPES OCULTOS — main.js (Premium UI, Fully Responsive & Fixed Scope)
 ══════════════════════════════════════════ */
 
-// ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO ───────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// ── 1. VARIÁVEIS DO BOTÃO E ANIMAÇÃO INICIAL ──────────────────
+// ── VARIÁVEIS DO BOTÃO E ANIMAÇÃO INICIAL ──────────────────
 const introCanvas = document.getElementById('intro-canvas');
 const ictx = introCanvas?.getContext('2d');
 let particles = [];
@@ -17,7 +16,6 @@ const enterBtn     = document.getElementById('enter-btn');
 const introEl      = document.getElementById('intro');
 const mainSite     = document.getElementById('main-site');
 
-// ── 2. ACIONAMENTO DO BOTÃO ENTRAR ───
 if (enterBtn) {
   enterBtn.addEventListener('click', () => {
     if (introEl) introEl.classList.add('fade-out');
@@ -45,7 +43,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ── BANCO DE DADOS LOCAL DOS VÍDEOS MP4 ──────────────────
 const listaDeVideos = {
   "v1": { title: "O Arquivo que Quase Desapareceu", url: "videos/arquivo.mp4" },
   "v2": { title: "Dentro da Sala Proibida", url: "videos/sala.mp4" },
@@ -66,7 +63,6 @@ let unsubVideoData = null;
 let unsubVideoComments = null;  
 let comentarioPaiIdAtivo = null; 
 
-// Elementos do Modal Interativo
 const playerVideo = document.getElementById("playerVideoMP4");
 const modalTitle = document.getElementById("modalVideoTitle");
 const countLikesSpan = document.getElementById("countLikes");
@@ -80,18 +76,13 @@ const inputUser = document.getElementById("commentUser");
 const inputText = document.getElementById("commentText");
 const commentsContainer = document.getElementById("commentsContainer");
 
-// Ouvinte do Ranking Global
 function monitorarRankingGlobal() {
   const videosRef = ref(db, 'videos/');
   onValue(videosRef, (snapshot) => {
     const data = snapshot.val();
     if (!data) return;
-
     let somaViewsGerais = 0;
-    Object.keys(data).forEach(id => {
-      somaViewsGerais += data[id].views || 0;
-    });
-
+    Object.keys(data).forEach(id => { somaViewsGerais += data[id].views || 0; });
     const countViewsEl = document.getElementById('count-views');
     if (countViewsEl) {
       countViewsEl.textContent = somaViewsGerais >= 1000000 
@@ -136,7 +127,6 @@ class Particle {
     ictx.fill();
   }
 }
-
 if (introCanvas) {
   for (let i = 0; i < NUM_PARTICLES; i++) particles.push(new Particle());
 }
@@ -182,13 +172,11 @@ function initHeroCanvas() {
   window.addEventListener('resize', resizeHeroCanvas);
   animateHero();
 }
-
 function resizeHeroCanvas() {
   if (!heroCanvas) return;
   heroCanvas.width  = heroCanvas.offsetWidth;
   heroCanvas.height = heroCanvas.offsetHeight;
 }
-
 let heroTime = 0;
 function animateHero() {
   if (!heroCanvas || !hctx) return;
@@ -197,7 +185,6 @@ function animateHero() {
   const w = heroCanvas.width;
   const h = heroCanvas.height;
   hctx.clearRect(0, 0, w, h);
-
   const gridSize = 60;
   const offsetX = (heroTime * 20) % gridSize;
   const offsetY = (heroTime * 10) % gridSize;
@@ -209,7 +196,6 @@ function animateHero() {
   for (let y = -gridSize + offsetY; y < h + gridSize; y += gridSize) {
     hctx.beginPath(); hctx.moveTo(0, y); hctx.lineTo(w, y); hctx.stroke();
   }
-
   const grad = hctx.createRadialGradient(w * 0.2, h * 0.5, 0, w * 0.2, h * 0.5, w * 0.6);
   grad.addColorStop(0, 'rgba(232,255,60,0.04)');
   grad.addColorStop(1, 'transparent');
@@ -240,18 +226,14 @@ function generateNoise() {
   }, 80);
 }
 
-// ── COUNTERS ─────────────────────────────────────────────
 function animateCounters() {
-  const targets = {
-    'count-videos': 140,
-    'count-cats':   6,
-  };
+  const targets = { 'count-videos': 140, 'count-cats': 6 };
   Object.entries(targets).forEach(([id, target]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    let current   = 0;
-    const step   = Math.ceil(target / 60);
-    const timer  = setInterval(() => {
+    let current = 0;
+    const step = Math.ceil(target / 60);
+    const timer = setInterval(() => {
       current += step;
       if (current >= target) { current = target; clearInterval(timer); }
       el.textContent = current;
@@ -259,7 +241,6 @@ function animateCounters() {
   });
 }
 
-// ── NAVBAR SCROLL ────────────────────────────────────────
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
@@ -267,7 +248,6 @@ window.addEventListener('scroll', () => {
   if (scrollTopBtn) scrollTopBtn.classList.toggle('hidden', window.scrollY < 400);
 });
 
-// ── HAMBURGER ────────────────────────────────────────────
 const hamburger  = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
 if (hamburger && mobileMenu) {
@@ -277,12 +257,10 @@ if (hamburger && mobileMenu) {
   });
 }
 
-// ── SEARCH ───────────────────────────────────────────────
 const searchToggle = document.getElementById('searchToggle');
 const searchBar    = document.getElementById('searchBar');
 const searchClose  = document.getElementById('searchClose');
 const searchInput  = document.getElementById('searchInput');
-
 if (searchToggle && searchBar) {
   searchToggle.addEventListener('click', () => {
     searchBar.classList.toggle('open');
@@ -290,7 +268,14 @@ if (searchToggle && searchBar) {
   });
 }
 
-// ── ENGINE DE COMENTÁRIOS COM INTERFACE PREMIUM EXTRAÍDA DE CORES TERMINAL ──
+// ── REATIVIDADE EM TEMPO REAL AO DIGITAR O NOME DO USUÁRIO ──
+if (inputUser) {
+  inputUser.addEventListener("input", () => {
+    if (videoAtivoId) carregarComentariosRealtime(videoAtivoId);
+  });
+}
+
+// ── MOTOR DE COMENTÁRIOS COM AMBIENTAÇÃO PREMIUM TERMINAL ──
 function carregarComentariosRealtime(idDoVideo) {
   const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
   
@@ -301,7 +286,7 @@ function carregarComentariosRealtime(idDoVideo) {
     
     if (data) {
       const tempoLimite90Dias = Date.now() - (90 * 24 * 60 * 60 * 1000);
-      const nomeUsuarioAtual = inputUser?.value.trim();
+      const nomeUsuarioAtual = inputUser?.value.trim().toLowerCase();
 
       Object.keys(data).forEach(key => {
         const c = data[key];
@@ -320,13 +305,14 @@ function carregarComentariosRealtime(idDoVideo) {
       
       commentsContainer.scrollTop = commentsContainer.scrollHeight;
     } else {
-      commentsContainer.innerHTML = `<p style="color:#555; font-size:0.85rem; font-family:'Space Mono'; letter-spacing: -0.3px; text-align: center; padding: 20px 0;">[ SISTEMA VAZIO: NENHUM REGISTRO ENCONTRADO ]</p>`;
+      commentsContainer.innerHTML = `<p style="color:#555; font-size:0.85rem; font-family:'Space Mono'; text-align: center; padding: 20px 0;">[ SISTEMA VAZIO: NENHUM REGISTRO ENCONTRADO ]</p>`;
     }
   });
 }
 
 function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usuarioAtual) {
   const item = document.createElement("div");
+  item.className = "premium-comment-box";
   item.style.padding = "14px";
   item.style.background = "#141414";
   item.style.border = "1px solid #222";
@@ -334,51 +320,43 @@ function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usua
   item.style.fontFamily = "'Space Mono', monospace";
   item.style.marginBottom = "12px";
   item.style.position = "relative";
-  item.style.transition = "border-color 0.2s ease";
 
   const totalLikes = dados.likes || 0;
+  const exibeControleAutor = (usuarioAtual && dados.user.toLowerCase() === usuarioAtual) ? "inline-flex" : "none";
 
   item.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <span style="color: #e8ff3c; font-weight: 600; font-size: 0.9rem; letter-spacing: -0.3px;">// ${dados.user}</span>
-      <span style="font-size: 0.75rem; color: #555; font-variant-numeric: tabular-nums;">${new Date(dados.timestamp).toLocaleDateString()}</span>
+      <span style="color: #e8ff3c; font-weight: 600; font-size: 0.9rem;">// ${dados.user}</span>
+      <span style="font-size: 0.75rem; color: #555;">${new Date(dados.timestamp).toLocaleDateString()}</span>
     </div>
     <div id="text-container-${commentId}" style="line-height: 1.5; font-size:0.88rem; color: #bbb; margin: 8px 0 12px 0; word-break: break-word;">
       ${dados.text}
     </div>
     
-    <!-- Barra Dinâmica e Premium de Ações (Corrige desalinhamentos vistos em image_56c1d9.png) -->
     <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.78rem; border-top: 1px solid #1c1c1c; padding-top: 10px;">
-      <button onclick="curtirComentario('${idDoVideo}', '${commentId}')" style="background:none; border:none; color:#666; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#e8ff3c'" onmouseout="this.style.color='#666'">
+      <button onclick="window.curtirComentario('${idDoVideo}', '${commentId}')" style="background:none; border:none; color:#666; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#e8ff3c'" onmouseout="this.style.color='#666'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
         <span>Apoiar (${totalLikes})</span>
       </button>
       
-      <button onclick="ativarModoResposta('${commentId}', '${dados.user}')" style="background:none; border:none; color:#666; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#666'">
+      <button onclick="window.ativarModoResposta('${commentId}', '${dados.user}')" style="background:none; border:none; color:#666; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#666'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span>Responder</span>
       </button>
       
-      <button onclick="editarComentario('${idDoVideo}', '${commentId}', '${dados.text}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:none; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#00bfff'" onmouseout="this.style.color='#444'">
+      <button onclick="window.editarComentario('${idDoVideo}', '${commentId}', \`${dados.text.replace(/'/g, "\\'")}\`)" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:${exibeControleAutor}; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#00bfff'" onmouseout="this.style.color='#444'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"/></svg>
         <span>Alterar</span>
       </button>
       
-      <button onclick="excluirComentario('${idDoVideo}', '${commentId}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:none; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#444'">
+      <button onclick="window.excluirComentario('${idDoVideo}', '${commentId}')" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:${exibeControleAutor}; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#444'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         <span>Remover</span>
       </button>
     </div>
 
-    <!-- Sub-container de Respostas Estruturado Conectivo -->
     <div id="respostas-${commentId}" style="margin-top: 12px; padding-left: 14px; position: relative;"></div>
   `;
-
-  setTimeout(() => {
-    if (usuarioAtual && dados.user.toLowerCase() === usuarioAtual.toLowerCase()) {
-      item.querySelectorAll(`.btn-autor-${commentId}`).forEach(btn => btn.style.display = "inline-flex");
-    }
-  }, 100);
 
   const containerRespostas = item.querySelector(`#respostas-${commentId}`);
   let temRespostas = false;
@@ -387,6 +365,7 @@ function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usua
     const subC = todosOsDados[subKey];
     if (subC && subC.parentId === commentId) {
       temRespostas = true;
+      const exibeControleSubAutor = (usuarioAtual && subC.user.toLowerCase() === usuarioAtual) ? "inline-block" : "none";
       const respItem = document.createElement("div");
       respItem.style.margin = "10px 0 0 0";
       respItem.style.fontSize = "0.82rem";
@@ -394,30 +373,21 @@ function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usua
       respItem.style.border = "1px solid #1a1a1a";
       respItem.style.padding = "10px";
       respItem.style.borderRadius = "4px";
-      respItem.style.position = "relative";
       
       respItem.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="color: #888; font-weight:500;">${subC.user} <span style="color:#e8ff3c; font-size:0.75rem; font-weight:normal; opacity:0.8;">↳ replicou</span></strong>
-          <button onclick="excluirComentario('${idDoVideo}', '${subKey}')" class="btn-autor-${subKey}" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:none; transition: color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#444'">
+          <button onclick="window.excluirComentario('${idDoVideo}', '${subKey}')" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:${exibeControleSubAutor}; transition: color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#444'">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
         <p style="margin: 6px 0 0 0; color: #999; line-height: 1.4; word-break: break-word;">${subC.text}</p>
       `;
-      
-      setTimeout(() => {
-        if (usuarioAtual && subC.user.toLowerCase() === usuarioAtual.toLowerCase()) {
-          const btnDel = respItem.querySelector(`.btn-autor-${subKey}`);
-          if (btnDel) btnDel.style.display = "inline-block";
-        }
-      }, 100);
 
       containerRespostas.appendChild(respItem);
     }
   });
 
-  // Insere a linha vertical invisível de árvore técnica se contiver respostas
   if (temRespostas) {
     const linhaArvore = document.createElement("div");
     linhaArvore.style.position = "absolute";
@@ -445,7 +415,7 @@ function openRealtimeVideo(idDoVideo) {
   if (typeof unsubVideoComments === "function") unsubVideoComments();
 
   videoAtivoId = idDoVideo;
-  cancelarResposta(); 
+  window.cancelarResposta(); 
 
   if (modalTitle) modalTitle.innerText = videoInfo.title;
   if (playerVideo) playerVideo.src = videoInfo.url;
@@ -457,7 +427,6 @@ function openRealtimeVideo(idDoVideo) {
     modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // Sincronização dos botões de Likes/Dislikes
   if (btnLike) {
     const jaCurtiuEste = localStorage.getItem(`clips_ocultos_liked_${idDoVideo}`) === 'true';
     const likeTextEl = btnLike.querySelector('.like-text');
@@ -486,11 +455,9 @@ function openRealtimeVideo(idDoVideo) {
 
   if (!jaViuEsteVideo) {
     const viewsRef = ref(db, `videos/${idDoVideo}/views`);
-    runTransaction(viewsRef, (currentViews) => {
-      return (currentViews || 0) + 1;
-    }).then(() => {
-      localStorage.setItem(chaveViewStorage, 'true');
-    }).catch((error) => console.error("Erro ao computar view única:", error));
+    runTransaction(viewsRef, (currentViews) => { return (currentViews || 0) + 1; })
+    .then(() => { localStorage.setItem(chaveViewStorage, 'true'); })
+    .catch((error) => console.error("Erro views:", error));
   }
 
   const onlineRef = ref(db, `videos/${idDoVideo}/online/${Date.now()}`);
@@ -505,7 +472,6 @@ function openRealtimeVideo(idDoVideo) {
       if (countLikesSpan) countLikesSpan.innerText = data.likes || 0;
       if (countDislikesSpan) countDislikesSpan.innerText = data.dislikes || 0; 
       if (totalViewsSpan) totalViewsSpan.innerText = (data.views || 0).toLocaleString('pt-BR');
-      
       const totalOnline = data.online ? Object.keys(data.online).length : 1;
       if (onlineViewsSpan) onlineViewsSpan.innerText = totalOnline;
     }
@@ -525,24 +491,18 @@ function closeRealtimeVideo() {
   if (typeof unsubVideoData === "function") { unsubVideoData(); unsubVideoData = null; }
   if (typeof unsubVideoComments === "function") { unsubVideoComments(); unsubVideoComments = null; }
 
-  if (viewerRef) {
-    set(viewerRef, null);
-    viewerRef = null;
-  }
+  if (viewerRef) { set(viewerRef, null); viewerRef = null; }
   videoAtivoId = null;
-  cancelarResposta(); 
+  window.cancelarResposta(); 
 }
 
 function mapearBotoesPlay() {
   document.querySelectorAll('.video-card, .recent-item').forEach((card, index) => {
     if (card.getAttribute('data-mapped') === 'true') return; 
-    
     const newCard = card.cloneNode(true);
     newCard.setAttribute('data-mapped', 'true');
     card.parentNode.replaceChild(newCard, card);
-    
     const videoId = card.getAttribute('data-video-id') || `v${index + 1}`;
-    
     newCard.addEventListener('click', (e) => {
       e.preventDefault();
       openRealtimeVideo(videoId);
@@ -554,7 +514,7 @@ if (modalBackdrop) modalBackdrop.addEventListener('click', closeRealtimeVideo);
 if (modalClose) modalClose.addEventListener('click', closeRealtimeVideo);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtimeVideo(); });
 
-// ── GERENCIADORES DE LIKES / DISLIKES COM TRAVAS MECÂNICAS ──
+// ── TRAVAS DE LIKES / DISLIKES ──
 let enviandoLike = false;
 let enviandoDislike = false;
 
@@ -567,11 +527,9 @@ if (btnLike) {
     let jaDeuDislike = localStorage.getItem(chaveDislike) === 'true';
 
     localStorage.setItem(chaveLike, !jaCurtiu ? 'true' : 'false');
-
     enviandoLike = true; 
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
     const dislikesRef = ref(db, `videos/${videoAtivoId}/dislikes`);
-    
     const likeTextEl = btnLike.querySelector('.like-text');
     const dislikeTextEl = btnDislike?.querySelector('.dislike-text');
 
@@ -589,9 +547,7 @@ if (btnLike) {
         enviandoLike = false; 
       }).catch(() => { enviandoLike = false; });
     } else {
-      runTransaction(likesRef, (curr) => {
-        const n = (curr || 0) - 1; return n < 0 ? 0 : n;
-      }).then(() => {
+      runTransaction(likesRef, (curr) => { const n = (curr || 0) - 1; return n < 0 ? 0 : n; }).then(() => {
         btnLike.classList.remove('liked');
         if (likeTextEl) likeTextEl.textContent = 'Curtir';
         enviandoLike = false; 
@@ -609,11 +565,9 @@ if (btnDislike) {
     let jaDeuDislike = localStorage.getItem(chaveDislike) === 'true';
 
     localStorage.setItem(chaveDislike, !jaDeuDislike ? 'true' : 'false');
-
     enviandoDislike = true; 
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
     const dislikesRef = ref(db, `videos/${videoAtivoId}/dislikes`);
-    
     const likeTextEl = btnLike?.querySelector('.like-text');
     const dislikeTextEl = btnDislike.querySelector('.dislike-text');
 
@@ -631,9 +585,7 @@ if (btnDislike) {
         enviandoDislike = false; 
       }).catch(() => { enviandoDislike = false; });
     } else {
-      runTransaction(dislikesRef, (curr) => {
-        const n = (curr || 0) - 1; return n < 0 ? 0 : n;
-      }).then(() => {
+      runTransaction(dislikesRef, (curr) => { const n = (curr || 0) - 1; return n < 0 ? 0 : n; }).then(() => {
         btnDislike.classList.remove('disliked');
         if (dislikeTextEl) dislikeTextEl.textContent = 'Disgostar';
         enviandoDislike = false; 
@@ -648,46 +600,34 @@ if (btnSendComment) {
     const textoStr = inputText?.value.trim();
 
     if (!nomeStr || !textoStr) {
-      mostrarToastNotificacao("⚠ Preencha a credencial e a mensagem antes de transmitir.", "#ff3c6e");
+      mostrarToastNotificacao("⚠ Preencha seu nome e mensagem para transmitir.", "#ff3c6e");
       return;
     }
-
     if (!videoAtivoId) return;
 
     const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
-    const novoComentario = {
-      user: nomeStr,
-      text: textoStr,
-      timestamp: Date.now() 
-    };
+    const novoComentario = { user: nomeStr, text: textoStr, timestamp: Date.now() };
 
-    if (comentarioPaiIdAtivo) {
-      novoComentario.parentId = comentarioPaiIdAtivo;
-    }
+    if (comentarioPaiIdAtivo) novoComentario.parentId = comentarioPaiIdAtivo;
 
     push(commentsListRef, novoComentario).then(() => {
       if (inputText) inputText.value = "";
-      cancelarResposta(); 
-      mostrarToastNotificacao("✓ Comentário integrado com sucesso.", "#e8ff3c");
-    }).catch(() => {
-      mostrarToastNotificacao("⚠ Erro ao sincronizar com a base de dados.", "#ff3c6e");
+      window.cancelarResposta(); 
+      mostrarToastNotificacao("✓ Comentário integrado.", "#e8ff3c");
     });
   });
 }
 
-// ── UI INJECTED CONTROLS (Modais customizados premium para banir popups nativos) ──
+// ── INJEÇÃO ESTRETA DE ESCOPO GLOBAL WINDOW (Corrige Falhas de Cliques) ──
 
 window.curtirComentario = function(idDoVideo, commentId) {
   const chaveLikeComentario = `clips_ocultos_like_comment_${commentId}`;
   if (localStorage.getItem(chaveLikeComentario) === 'true') {
-    mostrarToastNotificacao("ℹ Assinatura de apoio já computada para este bloco.", "#ffffff");
+    mostrarToastNotificacao("ℹ Assinatura de apoio já computada.", "#ffffff");
     return;
   }
-
   const commentLikeRef = ref(db, `videos/${idDoVideo}/comments/${commentId}/likes`);
-  runTransaction(commentLikeRef, (curr) => {
-    return (curr || 0) + 1;
-  }).then(() => {
+  runTransaction(commentLikeRef, (curr) => { return (curr || 0) + 1; }).then(() => {
     localStorage.setItem(chaveLikeComentario, 'true');
   });
 };
@@ -698,7 +638,6 @@ window.ativarModoResposta = function(commentId, nomeAutor) {
     inputText.placeholder = `Respondendo para @${nomeAutor}...`;
     inputText.focus();
   }
-  
   let aviso = document.getElementById("aviso-resposta");
   if (!aviso && inputText) {
     aviso = document.createElement("div");
@@ -707,7 +646,7 @@ window.ativarModoResposta = function(commentId, nomeAutor) {
     aviso.style.color = "#e8ff3c";
     aviso.style.marginBottom = "6px";
     aviso.style.fontFamily = "'Space Mono', monospace";
-    aviso.innerHTML = `[ CONEXÃO ] Respondendo a @${nomeAutor} <span onclick="cancelarResposta()" style="color:#ff3c6e; cursor:pointer; margin-left:8px; text-decoration:underline;">[ABORTAR]</span>`;
+    aviso.innerHTML = `[ CONEXÃO ] Respondendo a @${nomeAutor} <span onclick="window.cancelarResposta()" style="color:#ff3c6e; cursor:pointer; margin-left:8px; text-decoration:underline;">[ABORTAR]</span>`;
     inputText.parentNode.insertBefore(aviso, inputText);
   }
 };
@@ -719,47 +658,66 @@ window.cancelarResposta = function() {
   if (aviso) aviso.remove();
 };
 
-// Modais Customizados Injetados Dinamicamente (Solução definitiva para image_56c1f9.png e image_56c4c8.png)
+// ── GERADOR DE MODAIS PREMIUM COM DESIGN RESPONSIVO E BOTÃO FECHAR (X) ──
 function criarFundoModalCustomizado(onConfirm, contentHTML) {
+  // Injeta Folha de Estilos Dinâmica para Responsividade Perfeita (Mobile & Desktop)
+  if (!document.getElementById("premium-modal-styles")) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = "premium-modal-styles";
+    styleSheet.innerText = `
+      .premium-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(5px);
+        display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 16px; box-sizing: border-box;
+      }
+      .premium-modal-box {
+        background: #0f0f0f; border: 1px solid #222; padding: 24px; border-radius: 8px;
+        position: relative; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.8); box-sizing: border-box;
+      }
+      /* Modo Mobile */
+      @media (max-width: 768px) { .premium-modal-box { max-width: 100%; padding: 20px; } }
+      /* Modo Desktop */
+      @media (min-width: 769px) { .premium-modal-box { max-width: 440px; } }
+    `;
+    document.head.appendChild(styleSheet);
+  }
+
   const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = "0"; overlay.style.left = "0";
-  overlay.style.width = "100vw"; overlay.style.height = "100vh";
-  overlay.style.background = "rgba(5, 5, 5, 0.85)";
-  overlay.style.backdropFilter = "blur(4px)";
-  overlay.style.display = "flex"; overlay.style.alignItems = "center"; overlay.style.justifyContent = "center";
-  overlay.style.zindex = "20000"; overlay.style.fontFamily = "'Space Mono', monospace";
+  overlay.className = "premium-overlay";
 
   const box = document.createElement("div");
-  box.style.background = "#0f0f0f"; box.style.border = "1px solid #222";
-  box.style.padding = "24px"; box.style.borderRadius = "8px"; box.style.width = "90%";
-  box.style.maxWidth = "420px"; box.style.boxShadow = "0 20px 40px rgba(0,0,0,0.5)";
+  box.className = "premium-modal-box";
 
-  box.innerHTML = contentHTML;
+  // Injeção de layout contendo o Botão superior direito de Fechar (X)
+  box.innerHTML = `
+    <button class="btn-close-modal-x" style="position:absolute; top:14px; right:14px; background:none; border:none; color:#555; font-size:1.1rem; cursor:pointer; font-family:sans-serif; transition:color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#555'">✕</button>
+    ${contentHTML}
+  `;
+  
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 
-  const fechar = () => overlay.remove();
-  
+  const destruirModal = () => overlay.remove();
+
+  box.querySelector(".btn-close-modal-x").addEventListener("click", destruirModal);
+  box.querySelector(".btn-cancel-modal").addEventListener("click", destruirModal);
   box.querySelector(".btn-confirm-modal").addEventListener("click", () => {
     onConfirm(box);
-    fechar();
+    destruirModal();
   });
-  box.querySelector(".btn-cancel-modal").addEventListener("click", fechar);
 }
 
 window.excluirComentario = function(idDoVideo, commentId) {
   criarFundoModalCustomizado(() => {
-    const commentRef = ref(db, `videos/${idDoVideo}/comments/${commentId}`);
-    set(commentRef, null).then(() => {
-      mostrarToastNotificacao("🗑 Registro purgado do terminal.", "#ff3c6e");
+    set(ref(db, `videos/${idDoVideo}/comments/${commentId}`), null).then(() => {
+      mostrarToastNotificacao("🗑 Registro removido da base central.", "#ff3c6e");
     });
   }, `
-    <h3 style="color:#fff; font-size:1.05rem; margin-bottom:12px; font-weight:600;">// DELETAR REGISTRO?</h3>
-    <p style="color:#777; font-size:0.85rem; line-height:1.5; margin-bottom:20px;">Esta ação removerá permanentemente o comentário do banco de dados centralizado.</p>
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button class="btn-cancel-modal" style="background:none; border:none; color:#666; cursor:pointer; font-size:0.85rem;">[ CANCELAR ]</button>
-      <button class="btn-confirm-modal" style="background:#ff3c6e; border:none; color:#fff; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:600;">CONFIRMAR PURGA</button>
+    <h3 style="color:#fff; font-size:1.05rem; margin: 0 0 12px 0; font-family:'Space Mono'; font-weight:600;">// EXCLUIR REGISTRO?</h3>
+    <p style="color:#777; font-size:0.85rem; line-height:1.5; margin-bottom:22px; font-family:'Space Mono';">Esta operação irá purgar a transmissão selecionada permanentemente de nossos servidores.</p>
+    <div style="display:flex; justify-content:flex-end; gap:14px; font-family:'Space Mono';">
+      <button class="btn-cancel-modal" style="background:none; border:none; color:#555; cursor:pointer; font-size:0.82rem; font-family:'Space Mono';">[ ABORTAR ]</button>
+      <button class="btn-confirm-modal" style="background:#ff3c6e; border:none; color:#fff; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:0.82rem; font-family:'Space Mono'; font-weight:600;">DELETAR</button>
     </div>
   `);
 };
@@ -768,19 +726,18 @@ window.editarComentario = function(idDoVideo, commentId, textoAntigo) {
   criarFundoModalCustomizado((box) => {
     const novoTexto = box.querySelector(".input-edit-modal").value.trim();
     if (!novoTexto) {
-      mostrarToastNotificacao("⚠ Operação abortada: corpo de texto vazio.", "#ff3c6e");
+      mostrarToastNotificacao("⚠ Abortado: Corpo de texto vazio.", "#ff3c6e");
       return;
     }
-    const commentTextRef = ref(db, `videos/${idDoVideo}/comments/${commentId}/text`);
-    set(commentTextRef, novoTexto).then(() => {
+    set(ref(db, `videos/${idDoVideo}/comments/${commentId}/text`), novoTexto).then(() => {
       mostrarToastNotificacao("✏ Transmissão modificada.", "#00bfff");
     });
   }, `
-    <h3 style="color:#fff; font-size:1.05rem; margin-bottom:12px; font-weight:600;">// REESCREVER TRANSMISSÃO</h3>
-    <textarea class="input-edit-modal" style="width:100%; height:80px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:8px; font-family:'Space Mono'; font-size:0.85rem; resize:none; box-sizing:border-box; margin-bottom:16px; outline:none;" placeholder="Ajuste a mensagem...">${textoAntigo}</textarea>
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button class="btn-cancel-modal" style="background:none; border:none; color:#666; cursor:pointer; font-size:0.85rem;">[ ABORTAR ]</button>
-      <button class="btn-confirm-modal" style="background:#e8ff3c; border:none; color:#000; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:600;">SALVAR ALTERAÇÃO</button>
+    <h3 style="color:#fff; font-size:1.05rem; margin:0 0 12px 0; font-family:'Space Mono'; font-weight:600;">// ALTERAR CONTEÚDO</h3>
+    <textarea class="input-edit-modal" style="width:100%; height:85px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:10px; font-family:'Space Mono'; font-size:0.85rem; resize:none; box-sizing:border-box; margin-bottom:18px; outline:none; font-weight:500;" placeholder="Reescreva o relatório...">${textoAntigo}</textarea>
+    <div style="display:flex; justify-content:flex-end; gap:14px; font-family:'Space Mono';">
+      <button class="btn-cancel-modal" style="background:none; border:none; color:#555; cursor:pointer; font-size:0.82rem; font-family:'Space Mono';">[ ABORTAR ]</button>
+      <button class="btn-confirm-modal" style="background:#e8ff3c; border:none; color:#000; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:0.82rem; font-family:'Space Mono'; font-weight:600;">SALVAR</button>
     </div>
   `);
 };
@@ -791,15 +748,10 @@ function mostrarToastNotificacao(mensagem, corFundo) {
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notificacao";
-    toast.style.position = "fixed";
-    toast.style.bottom = "24px";
-    toast.style.right = "24px";
-    toast.style.padding = "10px 20px";
-    toast.style.borderRadius = "4px";
-    toast.style.fontFamily = "'Space Mono', monospace";
-    toast.style.fontSize = "0.82rem";
-    toast.style.zIndex = "30000";
-    toast.style.transition = "opacity 0.2s ease";
+    toast.style.position = "fixed"; toast.style.bottom = "24px"; toast.style.right = "24px";
+    toast.style.padding = "10px 20px"; toast.style.borderRadius = "4px";
+    toast.style.fontFamily = "'Space Mono', monospace"; toast.style.fontSize = "0.82rem";
+    toast.style.zIndex = "999999"; toast.style.transition = "opacity 0.2s ease";
     document.body.appendChild(toast);
   }
   toast.textContent = mensagem;
@@ -807,18 +759,15 @@ function mostrarToastNotificacao(mensagem, corFundo) {
   toast.style.border = `1px solid ${corFundo}`;
   toast.style.color = corFundo;
   toast.style.opacity = "1";
-
   setTimeout(() => { toast.style.opacity = "0"; }, 4000);
 }
 
 document.addEventListener("DOMContentLoaded", mapearBotoesPlay);
 
-// ── SCROLL TOP & NEWSLETTER & LOAD MORE ──────────────────
+// ── SCROLL TOP & LOAD MORE ──────────────────
 const scrollTopBtn = document.getElementById('scrollTop');
 if (scrollTopBtn) {
-  scrollTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  scrollTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
 
 const loadMoreBtn = document.getElementById('loadMore');
@@ -844,7 +793,6 @@ if (loadMoreBtn) {
       el.classList.add('recent-item');
       const idInjetado = loadCount === 0 ? "v1" : "v2"; 
       el.setAttribute('data-video-id', idInjetado);
-
       el.innerHTML = `
         <div class="recent-thumb">
           <div class="thumb-placeholder ${v.tp}" style="width:100%;height:100%;"></div>
@@ -855,14 +803,11 @@ if (loadMoreBtn) {
           <h3>${v.title}</h3>
           <div class="video-meta"><span>${v.views} views</span><span>· ${v.time}</span></div>
         </div>`;
-      
-      el.style.opacity   = '0';
-      el.style.transform = 'translateY(16px)';
+      el.style.opacity   = '0'; el.style.transform = 'translateY(16px)';
       list.appendChild(el);
       requestAnimationFrame(() => {
         el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        el.style.opacity    = '1';
-        el.style.transform  = 'translateY(0)';
+        el.style.opacity    = '1'; el.style.transform  = 'translateY(0)';
       });
     });
     loadCount += 2;
@@ -870,7 +815,6 @@ if (loadMoreBtn) {
   });
 }
 
-// ── EFFECTS & OBSERVERS ──────────────────────────────────
 document.querySelectorAll('.cat-card').forEach(card => {
   card.addEventListener('mousemove', e => {
     const rect = card.getBoundingClientRect();
@@ -895,8 +839,7 @@ const observer = new IntersectionObserver((entries) => {
 
 setTimeout(() => {
   document.querySelectorAll('.cat-card, .video-card, .recent-item').forEach(el => {
-    el.style.opacity    = '0';
-    el.style.transform  = 'translateY(24px)';
+    el.style.opacity    = '0'; el.style.transform  = 'translateY(24px)';
     el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
     observer.observe(el);
   });
