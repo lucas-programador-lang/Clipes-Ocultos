@@ -481,18 +481,51 @@
 
   </div><!-- /main-site -->
 
-  <!-- MODAL DE VÍDEO -->
+  <!-- ── MODAL DE VÍDEO ATUALIZADO COM INTERAÇÕES EM TEMPO REAL ── -->
   <div id="videoModal" class="modal hidden">
     <div class="modal-backdrop" id="modalBackdrop"></div>
     <div class="modal-content">
       <button class="modal-close" id="modalClose">✕</button>
+      
+      <!-- Player de Vídeo MP4 Manual -->
       <div class="modal-player">
-        <div class="player-placeholder">
-          <div class="player-eye">◉</div>
-          <p>Vídeo em breve</p>
-          <p class="player-sub">Adicione o link do vídeo no código</p>
+        <video id="playerVideoMP4" width="100%" height="100%" controls autoplay></video>
+      </div>
+
+      <!-- Informações e Estatísticas em Tempo Real -->
+      <div class="modal-video-details" style="padding: 20px; color: #fff; background: #111;">
+        <h3 id="modalVideoTitle" style="font-family: 'Syne', sans-serif; font-size: 1.5rem; margin-bottom: 10px;">Título do Vídeo</h3>
+        
+        <div class="video-realtime-bar" style="display: flex; gap: 20px; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
+          <!-- Botão de Like -->
+          <button id="btnLike" style="background: #ff0055; color: white; border: none; padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px;">
+            ❤️ Curtir (<span id="countLikes">0</span>)
+          </button>
+          
+          <!-- Total Histórico de Views -->
+          <span style="color: #aaa;">👁️ Total de Views: <strong id="totalVideoViews" style="color: #fff;">0</strong></span>
+          
+          <!-- Pessoas assistindo agora (Tempo Real) -->
+          <span style="color: #00ff66; animation: pulse 2s infinite;">🟢 <strong id="onlineViews">1</strong> assistindo agora</span>
+        </div>
+
+        <!-- Seção de Comentários Reais -->
+        <div class="comments-section">
+          <h4 style="font-family: 'Syne', sans-serif; margin-bottom: 10px;">Comentários da Comunidade</h4>
+          
+          <div class="comment-form" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="commentUser" placeholder="Seu nome" style="background: #222; border: 1px solid #44px; color: white; padding: 8px; width: 30%; border-radius: 4px;">
+            <input type="text" id="commentText" placeholder="Escreva seu comentário..." style="background: #222; border: 1px solid #44px; color: white; padding: 8px; width: 70%; border-radius: 4px;">
+            <button id="btnSendComment" style="background: #fff; color: #000; border: none; padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 4px;">Enviar</button>
+          </div>
+
+          <!-- Onde os comentários vão aparecer dinamicamente -->
+          <div id="commentsContainer" style="max-height: 200px; overflow-y: auto; background: #151515; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px;">
+            <!-- Comentários via JS entram aqui -->
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 
