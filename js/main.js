@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Firebase Corrigido)
+   CLIPES OCULTOS — main.js (Firebase Corrigido & Comentários Avançados)
 ══════════════════════════════════════════ */
 
 // ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO (Movido para o topo para evitar erros de inicialização) ───
@@ -65,6 +65,7 @@ let videoAtivoId = null;
 let viewerRef = null;
 let unsubVideoData = null;      // Guarda a referência de cancelamento do onValue de dados
 let unsubVideoComments = null;  // Guarda a referência de cancelamento do onValue de comentários
+let comentarioPaiIdAtivo = null; // Variável global de controle para respostas (Thread)
 
 // Elementos do Modal Interativo
 const playerVideo = document.getElementById("playerVideoMP4");
@@ -249,7 +250,7 @@ function animateCounters() {
   Object.entries(targets).forEach(([id, target]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    let current  = 0;
+    let current   = 0;
     const step   = Math.ceil(target / 60);
     const timer  = setInterval(() => {
       current += step;
@@ -302,6 +303,124 @@ if (searchClose && searchBar) {
   });
 }
 
+// ── OUVINTE E RENDERIZADOR DE COMENTÁRIOS ATUALIZADO ──
+function carregarComentariosRealtime(idDoVideo) {
+  const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
+  
+  unsubVideoComments = onValue(commentsRef, (snapshot) => {
+    if (!commentsContainer) return;
+    commentsContainer.innerHTML = "";
+    const data = snapshot.val();
+    
+    if (data) {
+      const tempoLimite90Dias = Date.now() - (90 * 24 * 60 * 60 * 1000);
+      const nomeUsuarioAtual = inputUser?.value.trim();
+
+      Object.keys(data).forEach(key => {
+        const c = data[key];
+        if (!c) return; 
+
+        // Limpeza automática de 90 dias
+        if (c.timestamp && c.timestamp < tempoLimite90Dias) {
+          set(ref(db, `videos/${idDoVideo}/comments/${key}`), null);
+          return; 
+        }
+
+        // Ignora respostas nesta primeira passada (elas serão renderizadas dentro do pai)
+        if (c.parentId) return;
+
+        // Renderiza o comentário principal
+        const item = criarElementoComentario(idDoVideo, key, c, data, nomeUsuarioAtual);
+        commentsContainer.appendChild(item);
+      });
+      
+      commentsContainer.scrollTop = commentsContainer.scrollHeight;
+    } else {
+      commentsContainer.innerHTML = `<p style="color:#666; font-size:0.85rem; font-family:'Space Mono';">Nenhum comentário ainda. Seja o primeiro!</p>`;
+    }
+  });
+}
+
+// Função auxiliar para gerar o HTML de cada comentário e suas respostas
+function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usuarioAtual) {
+  const item = document.createElement("div");
+  item.style.padding = "10px";
+  item.style.background = "#222";
+  item.style.borderRadius = "4px";
+  item.style.fontFamily = "'Space Mono', monospace";
+  item.style.marginBottom = "8px";
+  item.style.borderLeft = "3px solid #e8ff3c";
+
+  const totalLikes = dados.likes || 0;
+
+  item.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <strong style="color: #e8ff3c;">${dados.user}:</strong>
+      <span style="font-size: 0.75rem; color: #888;">${new Date(dados.timestamp).toLocaleDateString()}</span>
+    </div>
+    <div id="text-container-${commentId}" style="margin: 6px 0; font-size:0.9rem; color: #fff;">
+      ${dados.text}
+    </div>
+    
+    <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem;">
+      <button onclick="curtirComentario('${idDoVideo}', '${commentId}')" style="background:none; border:none; color:#e8ff3c; cursor:pointer; padding:0;">
+        👍 (${totalLikes})
+      </button>
+      <button onclick="ativarModoResposta('${commentId}', '${dados.user}')" style="background:none; border:none; color:#888; cursor:pointer; padding:0;">
+        💬 Responder
+      </button>
+      
+      <button onclick="editarComentario('${idDoVideo}', '${commentId}', '${dados.text}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#00bfff; cursor:pointer; padding:0; display:none;">
+        ✏️ Editar
+      </button>
+      <button onclick="excluirComentario('${idDoVideo}', '${commentId}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#ff3c6e; cursor:pointer; padding:0; display:none;">
+        🗑️ Excluir
+      </button>
+    </div>
+
+    <div id="respostas-${commentId}" style="margin-top: 10px; padding-left: 15px; border-left: 1px dashed #444;"></div>
+  `;
+
+  // Exibe botões de edição/exclusão se o nome bater com o digitado no input de forma reativa
+  setTimeout(() => {
+    if (usuarioAtual && dados.user.toLowerCase() === usuarioAtual.toLowerCase()) {
+      item.querySelectorAll(`.btn-autor-${commentId}`).forEach(btn => btn.style.display = "inline-block");
+    }
+  }, 100);
+
+  // Renderiza sub-comentários (respostas) pertencentes a este pai
+  const containerRespostas = item.querySelector(`#respostas-${commentId}`);
+  Object.keys(todosOsDados).forEach(subKey => {
+    const subC = todosOsDados[subKey];
+    if (subC && subC.parentId === commentId) {
+      const respItem = document.createElement("div");
+      respItem.style.margin = "6px 0";
+      respItem.style.fontSize = "0.85rem";
+      respItem.style.background = "#1a1a1a";
+      respItem.style.padding = "6px";
+      respItem.style.borderRadius = "4px";
+      respItem.innerHTML = `
+        <div style="display: flex; justify-content: space-between;">
+          <strong style="color: #aaa;">${subC.user} <span style="color:#e8ff3c; font-size:0.75rem;">➔ respondeu</span>:</strong>
+          <button onclick="excluirComentario('${idDoVideo}', '${subKey}')" class="btn-autor-${subKey}" style="background:none; border:none; color:#ff3c6e; cursor:pointer; font-size:0.75rem; display:none;">🗑️</button>
+        </div>
+        <p style="margin: 4px 0 0 0; color: #ccc;">${subC.text}</p>
+      `;
+      
+      setTimeout(() => {
+        if (usuarioAtual && subC.user.toLowerCase() === usuarioAtual.toLowerCase()) {
+          const btnDel = respItem.querySelector(`.btn-autor-${subKey}`);
+          if (btnDel) btnDel.style.display = "inline-block";
+        }
+      }, 100);
+
+      containerRespostas.appendChild(respItem);
+    }
+  });
+
+  return item;
+}
+
 // ── REALTIME MODAL ENGINE ────────────────────────────────
 const modal         = document.getElementById('videoModal');
 const modalBackdrop = document.getElementById('modalBackdrop');
@@ -311,11 +430,13 @@ function openRealtimeVideo(idDoVideo) {
   const videoInfo = listaDeVideos[idDoVideo];
   if (!videoInfo) return;
 
-  // Cancena listeners anteriores para evitar estouro de memória/concorrência no Firebase
+  // Cancela listeners anteriores para evitar estouro de memória/concorrência no Firebase
   if (typeof unsubVideoData === "function") unsubVideoData();
   if (typeof unsubVideoComments === "function") unsubVideoComments();
 
   videoAtivoId = idDoVideo;
+  cancelarResposta(); // Garante reset do formulário de subcomentários
+
   if (modalTitle) modalTitle.innerText = videoInfo.title;
   if (playerVideo) playerVideo.src = videoInfo.url;
   
@@ -379,37 +500,8 @@ function openRealtimeVideo(idDoVideo) {
     }
   });
 
-  const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
-  unsubVideoComments = onValue(commentsRef, (snapshot) => {
-    if (!commentsContainer) return;
-    commentsContainer.innerHTML = "";
-    const data = snapshot.val();
-    if (data) {
-      const tempoLimite90Dias = Date.now() - (90 * 24 * 60 * 60 * 1000);
-
-      Object.keys(data).forEach(key => {
-        const c = data[key];
-        if (!c) return; 
-
-        if (c.timestamp && c.timestamp < tempoLimite90Dias) {
-          set(ref(db, `videos/${idDoVideo}/comments/${key}`), null);
-          return; 
-        }
-
-        const item = document.createElement("div");
-        item.style.padding = "6px 10px";
-        item.style.background = "#222";
-        item.style.borderRadius = "4px";
-        item.style.fontFamily = "'Space Mono', monospace";
-        item.style.marginBottom = "8px";
-        item.innerHTML = `<strong style="color: #e8ff3c;">${c.user}:</strong> <span style="font-size:0.9rem;">${c.text}</span>`;
-        commentsContainer.appendChild(item);
-      });
-      commentsContainer.scrollTop = commentsContainer.scrollHeight;
-    } else {
-      commentsContainer.innerHTML = `<p style="color:#666; font-size:0.85rem; font-family:'Space Mono';">Nenhum comentário ainda. Seja o primeiro!</p>`;
-    }
-  });
+  // Dispara o novo ouvinte estruturado de comentários e sub-respostas
+  carregarComentariosRealtime(idDoVideo);
 }
 
 function closeRealtimeVideo() {
@@ -428,6 +520,7 @@ function closeRealtimeVideo() {
     viewerRef = null;
   }
   videoAtivoId = null;
+  cancelarResposta(); // Limpa as caixas de texto e referências ao fechar
 }
 
 function mapearBotoesPlay() {
@@ -438,7 +531,6 @@ function mapearBotoesPlay() {
     newCard.setAttribute('data-mapped', 'true');
     card.parentNode.replaceChild(newCard, card);
     
-    // CORREÇÃO: Mapeia o ID de forma estática associando ao índice correto, se o ID explícito não existir no elemento
     const videoId = card.getAttribute('data-video-id') || `v${index + 1}`;
     
     newCard.addEventListener('click', (e) => {
@@ -456,7 +548,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtim
 let enviandoLike = false;
 let enviandoDislike = false;
 
-// ── GERENCIADOR DE LIKES INTELIGENTE (CORRIGIDO) ──
+// ── GERENCIADOR DE LIKES INTELIGENTE ──
 if (btnLike) {
   btnLike.addEventListener("click", () => {
     if (!videoAtivoId || enviandoLike) return;
@@ -505,7 +597,7 @@ if (btnLike) {
   });
 }
 
-// ── GERENCIADOR DE DISLIKES INTELIGENTE (CORRIGIDO) ──
+// ── GERENCIADOR DE DISLIKES INTELIGENTE ──
 if (btnDislike) {
   btnDislike.addEventListener("click", () => {
     if (!videoAtivoId || enviandoDislike) return;
@@ -554,7 +646,7 @@ if (btnDislike) {
   });
 }
 
-// ── ENVIO DE COMENTÁRIOS MODIFICADO COM VALIDAÇÃO E TOAST OBRIGATÓRIO ──
+// ── LÓGICA DE ENVIO ADAPTADA PARA SUPORTAR COMENTÁRIOS E RESPOSTAS ──
 if (btnSendComment) {
   btnSendComment.addEventListener("click", () => {
     const nomeStr = inputUser?.value.trim();
@@ -568,12 +660,21 @@ if (btnSendComment) {
     if (!videoAtivoId) return;
 
     const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
-    push(commentsListRef, {
+    
+    const novoComentario = {
       user: nomeStr,
       text: textoStr,
       timestamp: Date.now() 
-    }).then(() => {
+    };
+
+    // Se for resposta, injeta a propriedade parentId apontando para o comentário pai
+    if (comentarioPaiIdAtivo) {
+      novoComentario.parentId = comentarioPaiIdAtivo;
+    }
+
+    push(commentsListRef, novoComentario).then(() => {
       if (inputText) inputText.value = "";
+      cancelarResposta(); 
       mostrarToastNotificacao("✓ Comentário enviado com sucesso!", "#e8ff3c");
     }).catch((error) => {
       console.error("Erro ao enviar comentário:", error);
@@ -582,7 +683,79 @@ if (btnSendComment) {
   });
 }
 
-// ── FUNÇÃO DE TOAST REQUISITADA QUE ESTAVA AUSENTE (Evita ReferenceError) ──
+// ── WINDOW FUNCTIONS (Acessíveis diretamente pelos gatilhos onclick do HTML dinâmico) ──
+
+// 1. Curtir um comentário específico via Transaction
+window.curtirComentario = function(idDoVideo, commentId) {
+  const chaveLikeComentario = `clips_ocultos_like_comment_${commentId}`;
+  if (localStorage.getItem(chaveLikeComentario) === 'true') {
+    mostrarToastNotificacao("ℹ Você já curtiu este comentário.", "#00bfff");
+    return;
+  }
+
+  const commentLikeRef = ref(db, `videos/${idDoVideo}/comments/${commentId}/likes`);
+  runTransaction(commentLikeRef, (curr) => {
+    return (curr || 0) + 1;
+  }).then(() => {
+    localStorage.setItem(chaveLikeComentario, 'true');
+  });
+};
+
+// 2. Ativar Modo Resposta (Injetar um subcomentário na Thread)
+window.ativarModoResposta = function(commentId, nomeAutor) {
+  comentarioPaiIdAtivo = commentId;
+  if (inputText) {
+    inputText.placeholder = `Respondendo para @${nomeAutor}...`;
+    inputText.focus();
+  }
+  
+  let aviso = document.getElementById("aviso-resposta");
+  if (!aviso && inputText) {
+    aviso = document.createElement("div");
+    aviso.id = "aviso-resposta";
+    aviso.style.fontSize = "0.75rem";
+    aviso.style.color = "#00bfff";
+    aviso.style.marginBottom = "4px";
+    aviso.innerHTML = `Respondendo a @${nomeAutor} <span onclick="cancelarResposta()" style="color:#ff3c6e; cursor:pointer; margin-left:8px;">[Cancelar]</span>`;
+    inputText.parentNode.insertBefore(aviso, inputText);
+  }
+};
+
+window.cancelarResposta = function() {
+  comentarioPaiIdAtivo = null;
+  if (inputText) inputText.placeholder = "Escreva seu comentário...";
+  const aviso = document.getElementById("aviso-resposta");
+  if (aviso) aviso.remove();
+};
+
+// 3. Excluir Comentário permanentemente
+window.excluirComentario = function(idDoVideo, commentId) {
+  if (confirm("Deseja permanentemente deletar este comentário?")) {
+    const commentRef = ref(db, `videos/${idDoVideo}/comments/${commentId}`);
+    set(commentRef, null).then(() => {
+      mostrarToastNotificacao("🗑 Comentário removido.", "#ff3c6e");
+    });
+  }
+};
+
+// 4. Editar texto de comentário existente
+window.editarComentario = function(idDoVideo, commentId, textoAntigo) {
+  const novoTexto = prompt("Edite o seu comentário:", textoAntigo);
+  if (novoTexto === null) return; 
+  
+  const textoLimpo = novoTexto.trim();
+  if (!textoLimpo) {
+    mostrarToastNotificacao("⚠ O comentário não pode ficar vazio.", "#ff3c6e");
+    return;
+  }
+
+  const commentTextRef = ref(db, `videos/${idDoVideo}/comments/${commentId}/text`);
+  set(commentTextRef, textoLimpo).then(() => {
+    mostrarToastNotificacao("✏ Comentário editado!", "#00bfff");
+  });
+};
+
+// ── FUNÇÃO DE TOAST ──
 function mostrarToastNotificacao(mensagem, corFundo) {
   let toast = document.getElementById("toast-notificacao");
   if (!toast) {
@@ -599,7 +772,7 @@ function mostrarToastNotificacao(mensagem, corFundo) {
     toast.style.transition = "opacity 0.3s ease";
     document.body.appendChild(toast);
   }
-  toast.textContent = mensagem;
+  toast.textContent = mensaje;
   toast.style.background = "#111";
   toast.style.border = `1px solid ${corFundo}`;
   toast.style.color = corFundo;
@@ -666,7 +839,6 @@ if (loadMoreBtn) {
       const el = document.createElement('article');
       el.classList.add('recent-item');
       
-      // Adicionado data-video-id estático correspondente para prevenir erros de mapeamento assíncrono posterior
       const idInjetado = loadCount === 0 ? "v1" : loadCount === 2 ? "v2" : "v3"; 
       el.setAttribute('data-video-id', idInjetado);
 
