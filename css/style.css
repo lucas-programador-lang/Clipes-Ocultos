@@ -1806,3 +1806,56 @@ body::before {
 .premium-dislike-btn.disliked .like-divider {
   background: rgba(255, 255, 255, 0.4);
 }
+
+/* ==========================================================================
+   CORREÇÃO PREMIUM: BOTÃO FECHAR MODAL (FIXO E ACESSÍVEL)
+   ========================================================================== */
+
+/* Garante o correto posicionamento do contexto do modal */
+.modal-content {
+  position: relative !important;
+}
+
+/* Força o botão de fechar a flutuar de forma absoluta sobre todas as camadas */
+#modalClose.modal-close {
+  position: fixed !important; /* Mantém o botão preso na tela mesmo se houver scroll interno */
+  top: 20px !important;
+  right: 20px !important;
+  width: 42px !important;
+  height: 42px !important;
+  background: rgba(5, 7, 9, 0.85) !important; /* Fundo escuro para dar contraste sobre o vídeo */
+  border: 1px solid var(--border3) !important; /* Usa o token de borda neon do seu tema (--accent) */
+  color: var(--accent) !important; /* Cor do 'X' combinando com o amarelo neon do projeto */
+  font-family: 'Space Mono', monospace !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  border-radius: 50% !important; /* Transforma em um botão redondo perfeito */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 9999999 !important; /* Valor ultra alto para garantir prioridade total sobre o player */
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.8), 0 0 10px rgba(232, 255, 60, 0.1) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  outline: none !important;
+}
+
+/* Efeito Hover interativo combinando com a cor secundária (Rosa/Vermelho Neon) */
+#modalClose.modal-close:hover {
+  background: var(--accent2) !important; /* Altera para a cor rosa neon do tema (#ff3c6e) */
+  color: #ffffff !important;
+  border-color: var(--accent2) !important;
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(255, 60, 110, 0.6) !important;
+}
+
+/* Ajuste fino e responsivo para celulares (telas menores) */
+@media (max-width: 768px) {
+  #modalClose.modal-close {
+    top: 14px !important;
+    right: 14px !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.1rem !important;
+  }
+}
