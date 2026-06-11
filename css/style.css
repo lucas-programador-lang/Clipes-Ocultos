@@ -1886,3 +1886,52 @@ body::before {
   object-fit: contain !important; /* Mantém a proporção do vídeo sem esticar ou cortar */
   border-radius: inherit !important; /* Herda os cantos arredondados perfeitos do elemento pai */
 }
+
+
+/* ==========================================================================
+   SISTEMA DE ROLAGEM INTELIGENTE PARA OS COMENTÁRIOS (ZOOM 100%)
+   ========================================================================== */
+
+/* 1. Transforma o conteúdo do modal em um contêiner flexível vertical */
+.modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 88vh !important; /* Ajuste fino para dar mais espaço vertical */
+}
+
+/* 2. Impede o player de vídeo de esmagar a seção de baixo */
+.modal-player {
+  flex-shrink: 0 !important;
+}
+
+/* 3. Torna a barra de detalhes e formulários rolável caso falte espaço na tela */
+.modal-video-details {
+  flex: 1 !important;
+  overflow-y: auto !important; /* Cria uma barra de rolagem se o monitor for pequeno ou o zoom estiver alto */
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* 4. Garante que a caixa interna dos comentários se ajuste ao layout */
+#commentsContainer {
+  max-height: 250px !important; /* Limite confortável para os blocos de texto */
+  overflow-y: auto !important;
+  flex-grow: 1 !important; /* Faz a caixa expandir para preencher o fundo caso haja espaço */
+}
+
+/* Customização Premium da barra de rolagem interna (Estilo do site) */
+.modal-video-details::-webkit-scrollbar,
+#commentsContainer::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.modal-video-details::-webkit-scrollbar-track,
+#commentsContainer::-webkit-scrollbar-track {
+  background: #0a0a0a !important;
+}
+
+.modal-video-details::-webkit-scrollbar-thumb,
+#commentsContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent), var(--accent2)) !important; /* Degradê Amarelo para Rosa */
+  border-radius: 4px !important;
+}
