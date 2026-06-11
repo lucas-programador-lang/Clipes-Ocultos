@@ -2,6 +2,10 @@
    CLIPES OCULTOS — main.js (Firebase Corrigido)
 ══════════════════════════════════════════ */
 
+// ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO (Movido para o topo para evitar erros de inicialização) ───
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
 // ── 1. VARIÁVEIS DO BOTÃO E ANIMAÇÃO INICIAL ──────────────────
 const introCanvas = document.getElementById('intro-canvas');
 const ictx = introCanvas?.getContext('2d');
@@ -27,10 +31,6 @@ if (enterBtn) {
     }, 800);
   });
 }
-
-// ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO ──────────────
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBeG82FG84I1k3VN3PbfRjON7C-cX5FMjU",
@@ -387,11 +387,12 @@ function openRealtimeVideo(idDoVideo) {
 
       Object.keys(data).forEach(key => {
         const c = data[key];
+        if (!c) return; // Verificação de segurança defensiva
 
         // Se o comentário passou dos 90 dias, deleta no Firebase e ignora a renderização
         if (c.timestamp && c.timestamp < tempoLimite90Dias) {
           set(ref(db, `videos/${idDoVideo}/comments/${key}`), null);
-          return;
+          return; // Interrompe renderização deste item deletado
         }
 
         const item = document.createElement("div");
@@ -426,13 +427,20 @@ function closeRealtimeVideo() {
 }
 
 function mapearBotoesPlay() {
+  // Corrigido para atribuir IDs únicos com base em um atributo ou índice real estático sem quebrar no clone do Load More
   document.querySelectorAll('.video-card, .recent-item').forEach((card, index) => {
+    if (card.getAttribute('data-mapped') === 'true') return; // Evita re-mapear cartões antigos e quebrar os IDs
+    
     const newCard = card.cloneNode(true);
+    newCard.setAttribute('data-mapped', 'true');
     card.parentNode.replaceChild(newCard, card);
+    
+    // Define dinamicamente o ID correto baseado na ordem dele no DOM no momento da injeção
+    const videoId = `v${index + 1}`;
     
     newCard.addEventListener('click', (e) => {
       e.preventDefault();
-      openRealtimeVideo(`v${index + 1}`);
+      openRealtimeVideo(videoId);
     });
   });
 }
@@ -583,9 +591,9 @@ let loadCount     = 0;
 const moreVideos  = [
   { cat: 'Câmera Oculta',   title: 'Reunião que Ninguém Deveria Ver',         views: '7.2K',  time: 'há 1 dia',   tp: 'tp2'  },
   { cat: 'Documentário',    title: 'Arquivo Perdido de 1971',                  views: '44K',   time: 'há 2 dias',  tp: 'tp1'  },
-  { cat: 'Momentos Raros',  title: 'Dois Raios no Mesmo Lugar',                views: '15K',   time: 'há 3 dias',  tp: 'tp3'  },
-  { cat: 'Mundo Oculto',    title: 'Praia Sem Turistas — Litoral Fantasma',    views: '28K',   time: 'há 4 dias',  tp: 'tp5'  },
-  { cat: 'Investigação',    title: 'Fundo Misterioso de ONG Internacional',    views: '51K',   time: 'há 5 dias',  tp: 'tp4'  },
+  { cat: 'Momentos Raros',  title: 'Dois Raios no Mesmo Lugar',                 views: '15K',   time: 'há 3 dias',  tp: 'tp3'  },
+  { cat: 'Mundo Oculto',    title: 'Praia Sem Turistas — Litoral Fantasma',     views: '28K',   time: 'há 4 dias',  tp: 'tp5'  },
+  { cat: 'Investigação',    title: 'Fundo Misterioso de ONG Internacional',     views: '51K',   time: 'há 5 dias',  tp: 'tp4'  },
   { cat: 'Arquivo Secreto', title: 'Ligação Interceptada — Sem Classificação', views: '9.7K',  time: 'há 6 dias',  tp: 'tp6'  },
 ];
 
