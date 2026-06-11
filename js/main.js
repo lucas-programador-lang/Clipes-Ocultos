@@ -560,6 +560,8 @@ if (btnDislike) {
 }
 
 
+// ... (Todo o código anterior de 'main.js corrigir.js' permanece exatamente igual)
+
 // ── ENVIO DE COMENTÁRIOS MODIFICADO COM VALIDAÇÃO E TOAST OBRIGATÓRIO ──
 if (btnSendComment) {
   btnSendComment.addEventListener("click", () => {
@@ -575,3 +577,171 @@ if (btnSendComment) {
     if (!videoAtivoId) return;
 
     const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
+    push(commentsListRef, {
+      user: nomeStr,
+      text: textoStr,
+      timestamp: Date.now() // O timestamp essencial para a contagem de exclusão automática
+    }).then(() => {
+      if (inputText) inputText.value = "";
+      mostrarToastNotificacao("✓ Comentário enviado com sucesso!", "#e8ff3c");
+    }).catch((error) => {
+      console.error("Erro ao enviar comentário:", error);
+      mostrarToastNotificacao("⚠ Erro ao salvar no servidor.", "#ff3c6e");
+    });
+  });
+}
+
+// ── FUNÇÃO DE TOAST REQUISITADA QUE ESTAVA AUSENTE (Evita ReferenceError) ──
+function mostrarToastNotificacao(mensagem, corFundo) {
+  let toast = document.getElementById("toast-notificacao");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast-notificacao";
+    toast.style.position = "fixed";
+    toast.style.bottom = "20px";
+    toast.style.right = "20px";
+    toast.style.padding = "12px 24px";
+    toast.style.borderRadius = "4px";
+    toast.style.fontFamily = "'Space Mono', monospace";
+    toast.style.fontSize = "0.9rem";
+    toast.style.zIndex = "10000";
+    toast.style.transition = "opacity 0.3s ease";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = mensagem;
+  toast.style.background = "#111";
+  toast.style.border = `1px solid ${corFundo}`;
+  toast.style.color = corFundo;
+  toast.style.opacity = "1";
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+  }, 4000);
+}
+
+document.addEventListener("DOMContentLoaded", mapearBotoesPlay);
+
+// ── SCROLL TOP & NEWSLETTER & LOAD MORE ──────────────────
+const scrollTopBtn = document.getElementById('scrollTop');
+if (scrollTopBtn) {
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+const nlBtn  = document.getElementById('nlBtn');
+const nlNote = document.getElementById('nlNote');
+if (nlBtn) {
+  nlBtn.addEventListener('click', () => {
+    const emailEl = document.getElementById('nlEmail');
+    const email = emailEl ? emailEl.value.trim() : "";
+    const re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!nlNote) return;
+    if (!re.test(email)) {
+      nlNote.textContent = '⚠ Insira um e-mail válido.';
+      nlNote.style.color = '#ff3c6e';
+      return;
+    }
+    nlNote.textContent = '✓ Inscrição realizada com sucesso!';
+    nlNote.style.color = '#e8ff3c';
+    if (emailEl) emailEl.value = '';
+    setTimeout(() => { nlNote.textContent = ''; }, 4000);
+  });
+}
+
+const loadMoreBtn = document.getElementById('loadMore');
+let loadCount     = 0;
+const moreVideos  = [
+  { cat: 'Câmera Oculta',   title: 'Reunião que Ninguém Deveria Ver',         views: '7.2K',  time: 'há 1 dia',   tp: 'tp2'  },
+  { cat: 'Documentário',    title: 'Arquivo Perdido de 1971',                  views: '44K',   time: 'há 2 dias',  tp: 'tp1'  },
+  { cat: 'Momentos Raros',  title: 'Dois Raios no Mesmo Lugar',                 views: '15K',   time: 'há 3 dias',  tp: 'tp3'  },
+  { cat: 'Mundo Oculto',    title: 'Praia Sem Turistas — Litoral Fantasma',     views: '28K',   time: 'há 4 dias',  tp: 'tp5'  },
+  { cat: 'Investigação',    title: 'Fundo Misterioso de ONG Internacional',     views: '51K',   time: 'há 5 dias',  tp: 'tp4'  },
+  { cat: 'Arquivo Secreto', title: 'Ligação Interceptada — Sem Classificação', views: '9.7K',  time: 'há 6 dias',  tp: 'tp6'  },
+];
+
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener('click', () => {
+    if (loadCount >= moreVideos.length) {
+      loadMoreBtn.textContent = 'Sem mais vídeos por agora';
+      loadMoreBtn.disabled    = true;
+      return;
+    }
+    const batch = moreVideos.slice(loadCount, loadCount + 2);
+    const list  = document.getElementById('recentsList');
+    if (!list) return;
+    
+    batch.forEach(v => {
+      const el = document.createElement('article');
+      el.classList.add('recent-item');
+      el.innerHTML = `
+        <div class="recent-thumb">
+          <div class="thumb-placeholder ${v.tp}" style="width:100%;height:100%;"></div>
+          <span class="video-duration">${(Math.random()*10+1).toFixed(0)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}</span>
+        </div>
+        <div class="recent-info">
+          <span class="video-cat">${v.cat}</span>
+          <h3>${v.title}</h3>
+          <div class="video-meta"><span>${v.views} views</span><span>· ${v.time}</span></div>
+        </div>`;
+      
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(16px)';
+      list.appendChild(el);
+      requestAnimationFrame(() => {
+        el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        el.style.opacity    = '1';
+        el.style.transform  = 'translateY(0)';
+      });
+    });
+    loadCount += 2;
+    mapearBotoesPlay();
+  });
+}
+
+// ── EFFECTS & OBSERVERS ──────────────────────────────────
+document.querySelectorAll('.cat-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const cx   = rect.left + rect.width / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dx   = (e.clientX - cx) / (rect.width  / 2);
+    const dy   = (e.clientY - cy) / (rect.height / 2);
+    card.style.transform = `translateY(-4px) rotateY(${dx * 6}deg) rotateX(${-dy * 6}deg)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity    = '1';
+      entry.target.style.transform  = 'translateY(0)';
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+setTimeout(() => {
+  document.querySelectorAll('.cat-card, .video-card, .recent-item').forEach(el => {
+    el.style.opacity    = '0';
+    el.style.transform  = 'translateY(24px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+}, 50);
+
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const target = document.querySelector(link.getAttribute('href') || '');
+    if (!target) return;
+    e.preventDefault();
+    const navH   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h') || '0');
+    const top    = target.getBoundingClientRect().top + window.scrollY - navH;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+} // Chave final que fecha a integridade do script caso esteja encapsulado
