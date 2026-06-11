@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Premium UI, Fully Responsive & Fixed Scope)
+   CLIPES OCULTOS — main.js (Fixed Modal Controls & Perfect Layout)
 ══════════════════════════════════════════ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -268,7 +268,7 @@ if (searchToggle && searchBar) {
   });
 }
 
-// ── REATIVIDADE EM TEMPO REAL AO DIGITAR O NOME DO USUÁRIO ──
+// Reatividade ao alterar o usuário logado
 if (inputUser) {
   inputUser.addEventListener("input", () => {
     if (videoAtivoId) carregarComentariosRealtime(videoAtivoId);
@@ -406,6 +406,17 @@ function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usua
 const modal         = document.getElementById('videoModal');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalClose    = document.getElementById('modalClose');
+
+// FORÇA VISIBILIDADE DO BOTÃO DE FECHAR DO VÍDEO (Evita que o CSS esconda)
+if (modalClose) {
+  modalClose.style.position = "absolute";
+  modalClose.style.top = "20px";
+  modalClose.style.right = "20px";
+  modalClose.style.zIndex = "999999";
+  modalClose.style.cursor = "pointer";
+  modalClose.style.display = "block";
+  modalClose.style.visibility = "visible";
+}
 
 function openRealtimeVideo(idDoVideo) {
   const videoInfo = listaDeVideos[idDoVideo];
@@ -618,8 +629,7 @@ if (btnSendComment) {
   });
 }
 
-// ── INJEÇÃO ESTRETA DE ESCOPO GLOBAL WINDOW (Corrige Falhas de Cliques) ──
-
+// ── INJEÇÃO ESTRETA DE ESCOPO GLOBAL WINDOW ──
 window.curtirComentario = function(idDoVideo, commentId) {
   const chaveLikeComentario = `clips_ocultos_like_comment_${commentId}`;
   if (localStorage.getItem(chaveLikeComentario) === 'true') {
@@ -658,26 +668,28 @@ window.cancelarResposta = function() {
   if (aviso) aviso.remove();
 };
 
-// ── GERADOR DE MODAIS PREMIUM COM DESIGN RESPONSIVO E BOTÃO FECHAR (X) ──
+// ── ENGENHARIA DE MODAIS CUSTOMIZADOS ULTRA PREMIUM RESPONSIVOS (MOBILE & DESKTOP) ──
 function criarFundoModalCustomizado(onConfirm, contentHTML) {
-  // Injeta Folha de Estilos Dinâmica para Responsividade Perfeita (Mobile & Desktop)
   if (!document.getElementById("premium-modal-styles")) {
     const styleSheet = document.createElement("style");
     styleSheet.id = "premium-modal-styles";
     styleSheet.innerText = `
       .premium-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 16px; box-sizing: border-box;
+        background: rgba(4, 4, 6, 0.9); backdrop-filter: blur(6px);
+        display: flex; align-items: center; justify-content: center; z-index: 999999; padding: 20px; box-sizing: border-box;
       }
       .premium-modal-box {
-        background: #0f0f0f; border: 1px solid #222; padding: 24px; border-radius: 8px;
-        position: relative; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.8); box-sizing: border-box;
+        background: #0a0a0c; border: 1px solid rgba(232,255,60,0.15); padding: 28px; border-radius: 8px;
+        position: relative; width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,0.9); box-sizing: border-box;
       }
-      /* Modo Mobile */
-      @media (max-width: 768px) { .premium-modal-box { max-width: 100%; padding: 20px; } }
-      /* Modo Desktop */
-      @media (min-width: 769px) { .premium-modal-box { max-width: 440px; } }
+      .btn-close-modal-x {
+        position: absolute; top: 16px; right: 16px; background: none; border: none; 
+        color: #555; font-size: 1.2rem; cursor: pointer; transition: all 0.2s; padding: 4px; line-height: 1;
+      }
+      .btn-close-modal-x:hover { color: #ff3c6e; transform: scale(1.15); }
+      @media (max-width: 768px) { .premium-modal-box { max-width: 100%; padding: 22px; } }
+      @media (min-width: 769px) { .premium-modal-box { max-width: 450px; } }
     `;
     document.head.appendChild(styleSheet);
   }
@@ -688,9 +700,8 @@ function criarFundoModalCustomizado(onConfirm, contentHTML) {
   const box = document.createElement("div");
   box.className = "premium-modal-box";
 
-  // Injeção de layout contendo o Botão superior direito de Fechar (X)
   box.innerHTML = `
-    <button class="btn-close-modal-x" style="position:absolute; top:14px; right:14px; background:none; border:none; color:#555; font-size:1.1rem; cursor:pointer; font-family:sans-serif; transition:color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#555'">✕</button>
+    <button class="btn-close-modal-x" title="Fechar Janela">✕</button>
     ${contentHTML}
   `;
   
@@ -713,8 +724,8 @@ window.excluirComentario = function(idDoVideo, commentId) {
       mostrarToastNotificacao("🗑 Registro removido da base central.", "#ff3c6e");
     });
   }, `
-    <h3 style="color:#fff; font-size:1.05rem; margin: 0 0 12px 0; font-family:'Space Mono'; font-weight:600;">// EXCLUIR REGISTRO?</h3>
-    <p style="color:#777; font-size:0.85rem; line-height:1.5; margin-bottom:22px; font-family:'Space Mono';">Esta operação irá purgar a transmissão selecionada permanentemente de nossos servidores.</p>
+    <h3 style="color:#fff; font-size:1.05rem; margin: 0 0 12px 0; font-family:'Space Mono'; font-weight:600; letter-spacing:-0.3px;">// DELETAR REGISTRO?</h3>
+    <p style="color:#777; font-size:0.85rem; line-height:1.5; margin-bottom:22px; font-family:'Space Mono';">[ALERTA]: Esta operação irá purgar a transmissão selecionada permanentemente dos servidores.</p>
     <div style="display:flex; justify-content:flex-end; gap:14px; font-family:'Space Mono';">
       <button class="btn-cancel-modal" style="background:none; border:none; color:#555; cursor:pointer; font-size:0.82rem; font-family:'Space Mono';">[ ABORTAR ]</button>
       <button class="btn-confirm-modal" style="background:#ff3c6e; border:none; color:#fff; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:0.82rem; font-family:'Space Mono'; font-weight:600;">DELETAR</button>
@@ -733,8 +744,8 @@ window.editarComentario = function(idDoVideo, commentId, textoAntigo) {
       mostrarToastNotificacao("✏ Transmissão modificada.", "#00bfff");
     });
   }, `
-    <h3 style="color:#fff; font-size:1.05rem; margin:0 0 12px 0; font-family:'Space Mono'; font-weight:600;">// ALTERAR CONTEÚDO</h3>
-    <textarea class="input-edit-modal" style="width:100%; height:85px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:10px; font-family:'Space Mono'; font-size:0.85rem; resize:none; box-sizing:border-box; margin-bottom:18px; outline:none; font-weight:500;" placeholder="Reescreva o relatório...">${textoAntigo}</textarea>
+    <h3 style="color:#fff; font-size:1.05rem; margin:0 0 12px 0; font-family:'Space Mono'; font-weight:600; letter-spacing:-0.3px;">// ALTERAR CONTEÚDO</h3>
+    <textarea class="input-edit-modal" style="width:100%; height:90px; background:#141416; border:1px solid #333; border-radius:4px; color:#fff; padding:12px; font-family:'Space Mono'; font-size:0.85rem; resize:none; box-sizing:border-box; margin-bottom:18px; outline:none; font-weight:500; line-height:1.4;" placeholder="Reescreva o relatório...">${textoAntigo}</textarea>
     <div style="display:flex; justify-content:flex-end; gap:14px; font-family:'Space Mono';">
       <button class="btn-cancel-modal" style="background:none; border:none; color:#555; cursor:pointer; font-size:0.82rem; font-family:'Space Mono';">[ ABORTAR ]</button>
       <button class="btn-confirm-modal" style="background:#e8ff3c; border:none; color:#000; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:0.82rem; font-family:'Space Mono'; font-weight:600;">SALVAR</button>
@@ -751,7 +762,7 @@ function mostrarToastNotificacao(mensagem, corFundo) {
     toast.style.position = "fixed"; toast.style.bottom = "24px"; toast.style.right = "24px";
     toast.style.padding = "10px 20px"; toast.style.borderRadius = "4px";
     toast.style.fontFamily = "'Space Mono', monospace"; toast.style.fontSize = "0.82rem";
-    toast.style.zIndex = "999999"; toast.style.transition = "opacity 0.2s ease";
+    toast.style.zIndex = "9999999"; toast.style.transition = "opacity 0.2s ease";
     document.body.appendChild(toast);
   }
   toast.textContent = mensagem;
