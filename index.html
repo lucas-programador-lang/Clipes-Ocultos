@@ -12,7 +12,6 @@
 </head>
 <body>
 
-  <!-- ── INTRO CINEMATIC ── -->
   <div id="intro">
     <canvas id="intro-canvas"></canvas>
     <div class="intro-content">
@@ -20,8 +19,8 @@
         <span class="eye-icon">◉</span>
         <h1 class="intro-title">CLIPES<br/><em>OCULTOS</em></h1>
       </div>
-      <p class="intro-sub">Vídeos que o mundo tentou esconder</p>
-      <button id="enter-btn" class="btn-enter">
+      <p class="intro-sub">Vídeos que o world tentou esconder</p>
+      <button id="enter-btn" class="btn-enter" aria-label="Entrar no site">
         <span>ENTRAR</span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -30,10 +29,8 @@
     <div class="intro-vignette"></div>
   </div>
 
-  <!-- ── SITE PRINCIPAL ── -->
   <div id="main-site" class="hidden">
 
-    <!-- NAV -->
     <nav id="navbar">
       <div class="nav-container">
         <a href="#" class="nav-logo">
@@ -47,20 +44,19 @@
           <a href="#recentes">Recentes</a>
           <a href="#sobre">Sobre</a>
         </div>
-        <button class="nav-search-btn" id="searchToggle" aria-label="Buscar">
+        <button class="nav-search-btn" id="searchToggle" aria-label="Buscar vídeos">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
-        <button class="hamburger" id="hamburger" aria-label="Menu">
+        <button class="hamburger" id="hamburger" aria-label="Abrir menu de navegação">
           <span></span><span></span><span></span>
         </button>
       </div>
       <div class="search-bar" id="searchBar">
-        <input type="text" placeholder="Buscar vídeos, temas, categorias…" id="searchInput" />
-        <button id="searchClose">✕</button>
+        <input type="text" placeholder="Buscar vídeos, temas, categorias…" id="searchInput" aria-label="Campo de busca" />
+        <button id="searchClose" aria-label="Fechar barra de busca">✕</button>
       </div>
     </nav>
 
-    <!-- MOBILE MENU -->
     <div class="mobile-menu" id="mobileMenu">
       <a href="#inicio" class="mob-link">Início</a>
       <a href="#categorias" class="mob-link">Categorias</a>
@@ -69,7 +65,6 @@
       <a href="#sobre" class="mob-link">Sobre</a>
     </div>
 
-    <!-- HERO -->
     <section id="inicio" class="hero">
       <canvas id="hero-canvas"></canvas>
       <div class="hero-content">
@@ -113,7 +108,6 @@
       </div>
     </section>
 
-    <!-- TICKER -->
     <div class="ticker-wrap">
       <div class="ticker-track" id="tickerTrack">
         <span>◉ CLIPES OCULTOS</span>
@@ -135,7 +129,6 @@
       </div>
     </div>
 
-    <!-- CATEGORIAS -->
     <section id="categorias" class="section categories-section">
       <div class="container">
         <div class="section-header">
@@ -184,7 +177,6 @@
       </div>
     </section>
 
-    <!-- EM ALTA -->
     <section id="em-alta" class="section trending-section">
       <div class="container">
         <div class="section-header">
@@ -198,7 +190,7 @@
             <div class="video-thumb">
               <div class="thumb-placeholder tp1"></div>
               <div class="video-overlay">
-                <button class="play-btn">
+                <button class="play-btn" aria-label="Reproduzir vídeo">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg>
                 </button>
                 <span class="video-duration">12:34</span>
@@ -220,7 +212,7 @@
             <div class="video-thumb">
               <div class="thumb-placeholder tp2"></div>
               <div class="video-overlay">
-                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <button class="play-btn" aria-label="Reproduzir vídeo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
                 <span class="video-duration">7:18</span>
               </div>
               <span class="trending-badge">#2</span>
@@ -236,7 +228,7 @@
             <div class="video-thumb">
               <div class="thumb-placeholder tp3"></div>
               <div class="video-overlay">
-                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <button class="play-btn" aria-label="Reproduzir vídeo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
                 <span class="video-duration">4:55</span>
               </div>
               <span class="trending-badge">#3</span>
@@ -252,7 +244,7 @@
             <div class="video-thumb">
               <div class="thumb-placeholder tp4"></div>
               <div class="video-overlay">
-                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <button class="play-btn" aria-label="Reproduzir vídeo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
                 <span class="video-duration">9:02</span>
               </div>
               <span class="trending-badge">#4</span>
@@ -268,7 +260,7 @@
             <div class="video-thumb">
               <div class="thumb-placeholder tp5"></div>
               <div class="video-overlay">
-                <button class="play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
+                <button class="play-btn" aria-label="Reproduzir vídeo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="8,5 22,12 8,19" fill="white"/></svg></button>
                 <span class="video-duration">6:47</span>
               </div>
               <span class="trending-badge">#5</span>
@@ -284,7 +276,6 @@
       </div>
     </section>
 
-    <!-- RECENTES -->
     <section id="recentes" class="section recents-section">
       <div class="container">
         <div class="section-header">
@@ -379,7 +370,6 @@
       </div>
     </section>
 
-    <!-- NEWSLETTER -->
     <section class="newsletter-section">
       <div class="container">
         <div class="newsletter-box">
@@ -387,7 +377,7 @@
           <h2>Não Perca Nenhum Clipe</h2>
           <p>Receba alertas quando novos vídeos forem publicados. Sem spam, só conteúdo que realmente vale.</p>
           <div class="nl-form">
-            <input type="email" placeholder="seu@email.com" id="nlEmail" />
+            <input type="email" placeholder="seu@email.com" id="nlEmail" aria-label="E-mail para inscrição" />
             <button class="btn-nl" id="nlBtn">Inscrever</button>
           </div>
           <p class="nl-note" id="nlNote"></p>
@@ -395,7 +385,6 @@
       </div>
     </section>
 
-    <!-- SOBRE -->
     <section id="sobre" class="section about-section">
       <div class="container">
         <div class="about-grid">
@@ -436,7 +425,6 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="footer">
       <div class="container">
         <div class="footer-grid">
@@ -465,10 +453,10 @@
           <div class="footer-social">
             <h4>Seguir</h4>
             <div class="social-icons">
-              <a href="#" aria-label="YouTube" class="social-link">▶</a>
-              <a href="#" aria-label="Telegram" class="social-link">✈</a>
-              <a href="#" aria-label="Instagram" class="social-link">◈</a>
-              <a href="#" aria-label="Twitter/X" class="social-link">✕</a>
+              <a href="#" aria-label="Acessar canal do YouTube" class="social-link">▶</a>
+              <a href="#" aria-label="Acessar grupo do Telegram" class="social-link">✈</a>
+              <a href="#" aria-label="Acessar perfil do Instagram" class="social-link">◈</a>
+              <a href="#" aria-label="Acessar perfil do Twitter X" class="social-link">✕</a>
             </div>
           </div>
         </div>
@@ -479,24 +467,20 @@
       </div>
     </footer>
 
-  </div><!-- /main-site -->
-
-  <!-- ── MODAL DE VÍDEO ATUALIZADO COM INTERAÇÕES EM TEMPO REAL ── -->
-  <div id="videoModal" class="modal hidden">
+  </div><div id="videoModal" class="modal hidden">
     <div class="modal-backdrop" id="modalBackdrop"></div>
     <div class="modal-content">
-      <button class="modal-close" id="modalClose">✕</button>
+      <button class="modal-close" id="modalClose" aria-label="Fechar janela de vídeo">✕</button>
       
-      <!-- Player de Vídeo MP4 Manual -->
       <div class="modal-player">
-        <video id="playerVideoMP4" width="100%" height="100%" controls autoplay></video>
+        <video id="playerVideoMP4" width="100%" height="100%" controls autoplay muted></video>
       </div>
 
-    <div class="modal-video-details">
+      <div class="modal-video-details">
         <h3 id="modalVideoTitle">Título do Vídeo</h3>
         
         <div class="video-realtime-bar">
-          <button id="btnLike" class="premium-like-btn">
+          <button id="btnLike" class="premium-like-btn" aria-label="Curtir este vídeo">
             <svg class="heart-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
@@ -525,22 +509,20 @@
           <h4>Comentários da Comunidade</h4>
           
           <div class="comment-form">
-            <input type="text" id="commentUser" placeholder="Seu nome">
-            <input type="text" id="commentText" placeholder="Escreva seu comentário...">
-            <button id="btnSendComment">Enviar</button>
+            <input type="text" id="commentUser" placeholder="Seu nome" aria-label="Seu nome">
+            <input type="text" id="commentText" placeholder="Escreva seu comentário..." aria-label="Texto do comentário">
+            <button id="btnSendComment" aria-label="Enviar comentário">Enviar</button>
           </div>
 
-          <div id="commentsContainer">
-            </div>
+          <div id="commentsContainer"></div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- SCROLL TO TOP -->
-  <button id="scrollTop" class="scroll-top hidden" aria-label="Topo">↑</button>
+  <button id="scrollTop" class="scroll-top hidden" aria-label="Voltar para o topo da página">↑</button>
 
- <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
