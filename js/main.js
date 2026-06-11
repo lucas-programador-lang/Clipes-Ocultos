@@ -63,16 +63,18 @@ const listaDeVideos = {
 
 let videoAtivoId = null;
 let viewerRef = null;
+let unsubVideoData = null;      // Guarda a referência de cancelamento do onValue de dados
+let unsubVideoComments = null;  // Guarda a referência de cancelamento do onValue de comentários
 
 // Elementos do Modal Interativo
 const playerVideo = document.getElementById("playerVideoMP4");
 const modalTitle = document.getElementById("modalVideoTitle");
 const countLikesSpan = document.getElementById("countLikes");
-const countDislikesSpan = document.getElementById("countDislikes"); // Novo contador de dislikes
+const countDislikesSpan = document.getElementById("countDislikes"); 
 const totalViewsSpan = document.getElementById("totalVideoViews");
 const onlineViewsSpan = document.getElementById("onlineViews");
 const btnLike = document.getElementById("btnLike");
-const btnDislike = document.getElementById("btnDislike"); // Novo botão de dislike
+const btnDislike = document.getElementById("btnDislike"); 
 const btnSendComment = document.getElementById("btnSendComment");
 const inputUser = document.getElementById("commentUser");
 const inputText = document.getElementById("commentText");
@@ -309,6 +311,10 @@ function openRealtimeVideo(idDoVideo) {
   const videoInfo = listaDeVideos[idDoVideo];
   if (!videoInfo) return;
 
+  // Cancena listeners anteriores para evitar estouro de memória/concorrência no Firebase
+  if (typeof unsubVideoData === "function") unsubVideoData();
+  if (typeof unsubVideoComments === "function") unsubVideoComments();
+
   videoAtivoId = idDoVideo;
   if (modalTitle) modalTitle.innerText = videoInfo.title;
   if (playerVideo) playerVideo.src = videoInfo.url;
@@ -316,12 +322,10 @@ function openRealtimeVideo(idDoVideo) {
   if (modal) modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
-  // ── FUNCIONALIDADE: ROLAR A PÁGINA PARA O MODAL/COMENTÁRIOS ──
   if (modal) {
     modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // Sincroniza os estados visuais locais de Like e Dislike do Usuário
   if (btnLike) {
     const jaCurtiuEste = localStorage.getItem(`clips_ocultos_liked_${idDoVideo}`) === 'true';
     const likeTextEl = btnLike.querySelector('.like-text');
@@ -345,7 +349,6 @@ function openRealtimeVideo(idDoVideo) {
     }
   }
 
-  // TRAVA DE VIEW REPETIDA: Só adiciona +1 se o usuário nunca viu esse vídeo antes
   const chaveViewStorage = `clips_ocultos_viewed_${idDoVideo}`;
   const jaViuEsteVideo = localStorage.getItem(chaveViewStorage) === 'true';
 
@@ -364,11 +367,11 @@ function openRealtimeVideo(idDoVideo) {
   viewerRef = onlineRef;
 
   const dataRef = ref(db, `videos/${idDoVideo}`);
-  onValue(dataRef, (snapshot) => {
+  unsubVideoData = onValue(dataRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
       if (countLikesSpan) countLikesSpan.innerText = data.likes || 0;
-      if (countDislikesSpan) countDislikesSpan.innerText = data.dislikes || 0; // Atualiza Dislikes
+      if (countDislikesSpan) countDislikesSpan.innerText = data.dislikes || 0; 
       if (totalViewsSpan) totalViewsSpan.innerText = (data.views || 0).toLocaleString('pt-BR');
       
       const totalOnline = data.online ? Object.keys(data.online).length : 1;
@@ -377,22 +380,20 @@ function openRealtimeVideo(idDoVideo) {
   });
 
   const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
-  onValue(commentsRef, (snapshot) => {
+  unsubVideoComments = onValue(commentsRef, (snapshot) => {
     if (!commentsContainer) return;
     commentsContainer.innerHTML = "";
     const data = snapshot.val();
     if (data) {
-      // ── FUNCIONALIDADE: APAGAR COMENTÁRIOS COM MAIS DE 90 DIAS ──
       const tempoLimite90Dias = Date.now() - (90 * 24 * 60 * 60 * 1000);
 
       Object.keys(data).forEach(key => {
         const c = data[key];
-        if (!c) return; // Verificação de segurança defensiva
+        if (!c) return; 
 
-        // Se o comentário passou dos 90 dias, deleta no Firebase e ignora a renderização
         if (c.timestamp && c.timestamp < tempoLimite90Dias) {
           set(ref(db, `videos/${idDoVideo}/comments/${key}`), null);
-          return; // Interrompe renderização deste item deletado
+          return; 
         }
 
         const item = document.createElement("div");
@@ -419,6 +420,9 @@ function closeRealtimeVideo() {
   if (modal) modal.classList.add('hidden');
   document.body.style.overflow = '';
 
+  if (typeof unsubVideoData === "function") { unsubVideoData(); unsubVideoData = null; }
+  if (typeof unsubVideoComments === "function") { unsubVideoComments(); unsubVideoComments = null; }
+
   if (viewerRef) {
     set(viewerRef, null);
     viewerRef = null;
@@ -427,16 +431,15 @@ function closeRealtimeVideo() {
 }
 
 function mapearBotoesPlay() {
-  // Corrigido para atribuir IDs únicos com base em um atributo ou índice real estático sem quebrar no clone do Load More
   document.querySelectorAll('.video-card, .recent-item').forEach((card, index) => {
-    if (card.getAttribute('data-mapped') === 'true') return; // Evita re-mapear cartões antigos e quebrar os IDs
+    if (card.getAttribute('data-mapped') === 'true') return; 
     
     const newCard = card.cloneNode(true);
     newCard.setAttribute('data-mapped', 'true');
     card.parentNode.replaceChild(newCard, card);
     
-    // Define dinamicamente o ID correto baseado na ordem dele no DOM no momento da injeção
-    const videoId = `v${index + 1}`;
+    // CORREÇÃO: Mapeia o ID de forma estática associando ao índice correto, se o ID explícito não existir no elemento
+    const videoId = card.getAttribute('data-video-id') || `v${index + 1}`;
     
     newCard.addEventListener('click', (e) => {
       e.preventDefault();
@@ -449,7 +452,6 @@ if (modalBackdrop) modalBackdrop.addEventListener('click', closeRealtimeVideo);
 if (modalClose) modalClose.addEventListener('click', closeRealtimeVideo);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtimeVideo(); });
 
-
 // ── VARIÁVEIS DE TRAVA MECÂNICA (BLOQUEIO ANTI-SPAM PARA CLIQUES RÁPIDOS) ──
 let enviandoLike = false;
 let enviandoDislike = false;
@@ -457,7 +459,6 @@ let enviandoDislike = false;
 // ── GERENCIADOR DE LIKES INTELIGENTE (CORRIGIDO) ──
 if (btnLike) {
   btnLike.addEventListener("click", () => {
-    // Se não houver vídeo ativo ou se já houver um clique sendo processado no Firebase, bloqueia o comando
     if (!videoAtivoId || enviandoLike) return;
 
     const chaveLike = `clips_ocultos_liked_${videoAtivoId}`;
@@ -466,21 +467,19 @@ if (btnLike) {
     let jaCurtiu = localStorage.getItem(chaveLike) === 'true';
     let jaDeuDislike = localStorage.getItem(chaveDislike) === 'true';
 
-    // Salva preventivamente no LocalStorage para impedir a concorrência de cliques simultâneos
     if (!jaCurtiu) {
       localStorage.setItem(chaveLike, 'true');
     } else {
       localStorage.removeItem(chaveLike);
     }
 
-    enviandoLike = true; // Ativa a barreira lógica antes de chamar o Firebase
+    enviandoLike = true; 
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
     const dislikesRef = ref(db, `videos/${videoAtivoId}/dislikes`);
     
     const likeTextEl = btnLike.querySelector('.like-text');
     const dislikeTextEl = btnDislike?.querySelector('.dislike-text');
 
-    // Se tiver dado dislike antes, remove o dislike primeiro
     if (jaDeuDislike && btnDislike) {
       runTransaction(dislikesRef, (curr) => (curr || 1) - 1);
       localStorage.removeItem(chaveDislike);
@@ -492,7 +491,7 @@ if (btnLike) {
       runTransaction(likesRef, (curr) => (curr || 0) + 1).then(() => {
         btnLike.classList.add('liked');
         if (likeTextEl) likeTextEl.textContent = 'Curtido';
-        enviandoLike = false; // Libera o botão após o processamento terminar com sucesso
+        enviandoLike = false; 
       }).catch(() => { enviandoLike = false; });
     } else {
       runTransaction(likesRef, (curr) => {
@@ -500,17 +499,15 @@ if (btnLike) {
       }).then(() => {
         btnLike.classList.remove('liked');
         if (likeTextEl) likeTextEl.textContent = 'Curtir';
-        enviandoLike = false; // Libera o botão
+        enviandoLike = false; 
       }).catch(() => { enviandoLike = false; });
     }
   });
 }
 
-
 // ── GERENCIADOR DE DISLIKES INTELIGENTE (CORRIGIDO) ──
 if (btnDislike) {
   btnDislike.addEventListener("click", () => {
-    // Se não houver vídeo ativo ou se já houver um clique sendo processado no Firebase, bloqueia o comando
     if (!videoAtivoId || enviandoDislike) return;
 
     const chaveLike = `clips_ocultos_liked_${videoAtivoId}`;
@@ -519,21 +516,19 @@ if (btnDislike) {
     let jaCurtiu = localStorage.getItem(chaveLike) === 'true';
     let jaDeuDislike = localStorage.getItem(chaveDislike) === 'true';
 
-    // Salva preventivamente no LocalStorage para impedir a concorrência de cliques simultâneos
     if (!jaDeuDislike) {
       localStorage.setItem(chaveDislike, 'true');
     } else {
       localStorage.removeItem(chaveDislike);
     }
 
-    enviandoDislike = true; // Ativa a barreira lógica
+    enviandoDislike = true; 
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
     const dislikesRef = ref(db, `videos/${videoAtivoId}/dislikes`);
     
     const likeTextEl = btnLike?.querySelector('.like-text');
     const dislikeTextEl = btnDislike.querySelector('.dislike-text');
 
-    // Se tiver dado like antes, remove o like primeiro
     if (jaCurtiu && btnLike) {
       runTransaction(likesRef, (curr) => (curr || 1) - 1);
       localStorage.removeItem(chaveLike);
@@ -545,7 +540,7 @@ if (btnDislike) {
       runTransaction(dislikesRef, (curr) => (curr || 0) + 1).then(() => {
         btnDislike.classList.add('disliked');
         if (dislikeTextEl) dislikeTextEl.textContent = 'Disgostado';
-        enviandoDislike = false; // Libera o botão após o término
+        enviandoDislike = false; 
       }).catch(() => { enviandoDislike = false; });
     } else {
       runTransaction(dislikesRef, (curr) => {
@@ -553,14 +548,11 @@ if (btnDislike) {
       }).then(() => {
         btnDislike.classList.remove('disliked');
         if (dislikeTextEl) dislikeTextEl.textContent = 'Disgostar';
-        enviandoDislike = false; // Libera o botão
+        enviandoDislike = false; 
       }).catch(() => { enviandoDislike = false; });
     }
   });
 }
-
-
-// ... (Todo o código anterior de 'main.js corrigir.js' permanece exatamente igual)
 
 // ── ENVIO DE COMENTÁRIOS MODIFICADO COM VALIDAÇÃO E TOAST OBRIGATÓRIO ──
 if (btnSendComment) {
@@ -568,7 +560,6 @@ if (btnSendComment) {
     const nomeStr = inputUser?.value.trim();
     const textoStr = inputText?.value.trim();
 
-    // VALIDAÇÃO EXIGIDA: Nome e Comentário agora são estritamente obrigatórios
     if (!nomeStr || !textoStr) {
       mostrarToastNotificacao("⚠ Erro: Você precisa preencher seu nome e o comentário!", "#ff3c6e");
       return;
@@ -580,7 +571,7 @@ if (btnSendComment) {
     push(commentsListRef, {
       user: nomeStr,
       text: textoStr,
-      timestamp: Date.now() // O timestamp essencial para a contagem de exclusão automática
+      timestamp: Date.now() 
     }).then(() => {
       if (inputText) inputText.value = "";
       mostrarToastNotificacao("✓ Comentário enviado com sucesso!", "#e8ff3c");
@@ -674,6 +665,11 @@ if (loadMoreBtn) {
     batch.forEach(v => {
       const el = document.createElement('article');
       el.classList.add('recent-item');
+      
+      // Adicionado data-video-id estático correspondente para prevenir erros de mapeamento assíncrono posterior
+      const idInjetado = loadCount === 0 ? "v1" : loadCount === 2 ? "v2" : "v3"; 
+      el.setAttribute('data-video-id', idInjetado);
+
       el.innerHTML = `
         <div class="recent-thumb">
           <div class="thumb-placeholder ${v.tp}" style="width:100%;height:100%;"></div>
@@ -743,5 +739,3 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
     window.scrollTo({ top, behavior: 'smooth' });
   });
 });
-
-} // Chave final que fecha a integridade do script caso esteja encapsulado
