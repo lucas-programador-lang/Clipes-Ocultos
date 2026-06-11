@@ -1,9 +1,8 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Firebase Corrigido)
+   CLIPES OCULTOS — main.js (Premium & Realtime)
 ══════════════════════════════════════════ */
 
 // ── 1. VARIÁVEIS DO BOTÃO E ANIMAÇÃO INICIAL ──────────────────
-// Colocadas no topo para funcionarem imediatamente, independente do Firebase
 const introCanvas = document.getElementById('intro-canvas');
 const ictx = introCanvas?.getContext('2d');
 let particles = [];
@@ -315,6 +314,20 @@ function openRealtimeVideo(idDoVideo) {
   if (modal) modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
+  // Sincroniza o estado visual do botão premium com o histórico local do usuário
+  if (btnLike) {
+    const jaCurtiuEste = localStorage.getItem(`clips_ocultos_liked_${idDoVideo}`) === 'true';
+    const likeTextEl = btnLike.querySelector('.like-text');
+    
+    if (jaCurtiuEste) {
+      btnLike.classList.add('liked');
+      if (likeTextEl) likeTextEl.textContent = 'Curtido';
+    } else {
+      btnLike.classList.remove('liked');
+      if (likeTextEl) likeTextEl.textContent = 'Curtir';
+    }
+  }
+
   const viewsRef = ref(db, `videos/${idDoVideo}/views`);
   runTransaction(viewsRef, (currentViews) => {
     return (currentViews || 0) + 1;
@@ -350,6 +363,7 @@ function openRealtimeVideo(idDoVideo) {
         item.style.background = "#222";
         item.style.borderRadius = "4px";
         item.style.fontFamily = "'Space Mono', monospace";
+        item.style.marginBottom = "8px";
         item.innerHTML = `<strong style="color: #e8ff3c;">${c.user}:</strong> <span style="font-size:0.9rem;">${c.text}</span>`;
         commentsContainer.appendChild(item);
       });
@@ -391,13 +405,38 @@ if (modalBackdrop) modalBackdrop.addEventListener('click', closeRealtimeVideo);
 if (modalClose) modalClose.addEventListener('click', closeRealtimeVideo);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtimeVideo(); });
 
+
+// ── GERENCIADOR ULTRA PREMIUM DE LIKES (INTEGRADO AO FIREBASE) ──
 if (btnLike) {
   btnLike.addEventListener("click", () => {
     if (!videoAtivoId) return;
+
+    const chaveStorage = `clips_ocultos_liked_${videoAtivoId}`;
+    let jaCurtiu = localStorage.getItem(chaveStorage) === 'true';
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
-    runTransaction(likesRef, (currentLikes) => {
-      return (currentLikes || 0) + 1;
-    });
+    const likeTextEl = btnLike.querySelector('.like-text');
+
+    if (!jaCurtiu) {
+      // Incrementa (+1) no Firebase de forma segura
+      runTransaction(likesRef, (currentLikes) => {
+        return (currentLikes || 0) + 1;
+      }).then(() => {
+        localStorage.setItem(chaveStorage, 'true');
+        btnLike.classList.add('liked');
+        if (likeTextEl) likeTextEl.textContent = 'Curtido';
+      }).catch((error) => console.error("Erro ao computar like:", error));
+
+    } else {
+      // Se clicar de novo, remove o voto (-1) no Firebase
+      runTransaction(likesRef, (currentLikes) => {
+        const novosLikes = (currentLikes || 0) - 1;
+        return novosLikes < 0 ? 0 : novosLikes; 
+      }).then(() => {
+        localStorage.removeItem(chaveStorage);
+        btnLike.classList.remove('liked');
+        if (likeTextEl) likeTextEl.textContent = 'Curtir';
+      }).catch((error) => console.error("Erro ao remover like:", error));
+    }
   });
 }
 
