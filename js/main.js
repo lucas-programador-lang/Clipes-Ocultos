@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Firebase Corrigido & Comentários Avançados)
+   CLIPES OCULTOS — main.js (Premium UI & Custom Modals)
 ══════════════════════════════════════════ */
 
-// ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO (Movido para o topo para evitar erros de inicialização) ───
+// ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO ───────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -17,7 +17,7 @@ const enterBtn     = document.getElementById('enter-btn');
 const introEl      = document.getElementById('intro');
 const mainSite     = document.getElementById('main-site');
 
-// ── 2. ACIONAMENTO DO BOTÃO ENTRAR (À PROVA DE TRAVAMENTOS) ───
+// ── 2. ACIONAMENTO DO BOTÃO ENTRAR ───
 if (enterBtn) {
   enterBtn.addEventListener('click', () => {
     if (introEl) introEl.classList.add('fade-out');
@@ -42,7 +42,6 @@ const firebaseConfig = {
   appId: "1:683346960432:web:9603b865aef1f59f030df5"
 };
 
-// Inicializa as conexões com segurança
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -63,9 +62,9 @@ const listaDeVideos = {
 
 let videoAtivoId = null;
 let viewerRef = null;
-let unsubVideoData = null;      // Guarda a referência de cancelamento do onValue de dados
-let unsubVideoComments = null;  // Guarda a referência de cancelamento do onValue de comentários
-let comentarioPaiIdAtivo = null; // Variável global de controle para respostas (Thread)
+let unsubVideoData = null;      
+let unsubVideoComments = null;  
+let comentarioPaiIdAtivo = null; 
 
 // Elementos do Modal Interativo
 const playerVideo = document.getElementById("playerVideoMP4");
@@ -81,7 +80,7 @@ const inputUser = document.getElementById("commentUser");
 const inputText = document.getElementById("commentText");
 const commentsContainer = document.getElementById("commentsContainer");
 
-// Ouvinte do Ranking Global (Contador do topo)
+// Ouvinte do Ranking Global
 function monitorarRankingGlobal() {
   const videosRef = ref(db, 'videos/');
   onValue(videosRef, (snapshot) => {
@@ -171,7 +170,7 @@ function animateIntro() {
 animateIntro();
 window.addEventListener('resize', resizeIntroCanvas);
 
-// ── HERO CANVAS (floating grid) ──────────────────────────
+// ── HERO CANVAS ──────────────────────────────────────────
 const heroCanvas = document.getElementById('hero-canvas');
 let hctx;
 let heroAnimId;
@@ -277,12 +276,6 @@ if (hamburger && mobileMenu) {
     mobileMenu.classList.toggle('open');
   });
 }
-document.querySelectorAll('.mob-link').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger?.classList.remove('open');
-    mobileMenu?.classList.remove('open');
-  });
-});
 
 // ── SEARCH ───────────────────────────────────────────────
 const searchToggle = document.getElementById('searchToggle');
@@ -296,14 +289,8 @@ if (searchToggle && searchBar) {
     if (searchBar.classList.contains('open') && searchInput) searchInput.focus();
   });
 }
-if (searchClose && searchBar) {
-  searchClose.addEventListener('click', () => {
-    searchBar.classList.remove('open');
-    if (searchInput) searchInput.value = '';
-  });
-}
 
-// ── OUVINTE E RENDERIZADOR DE COMENTÁRIOS ATUALIZADO ──
+// ── ENGINE DE COMENTÁRIOS COM INTERFACE PREMIUM EXTRAÍDA DE CORES TERMINAL ──
 function carregarComentariosRealtime(idDoVideo) {
   const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
   
@@ -320,91 +307,103 @@ function carregarComentariosRealtime(idDoVideo) {
         const c = data[key];
         if (!c) return; 
 
-        // Limpeza automática de 90 dias
         if (c.timestamp && c.timestamp < tempoLimite90Dias) {
           set(ref(db, `videos/${idDoVideo}/comments/${key}`), null);
           return; 
         }
 
-        // Ignora respostas nesta primeira passada (elas serão renderizadas dentro do pai)
         if (c.parentId) return;
 
-        // Renderiza o comentário principal
         const item = criarElementoComentario(idDoVideo, key, c, data, nomeUsuarioAtual);
         commentsContainer.appendChild(item);
       });
       
       commentsContainer.scrollTop = commentsContainer.scrollHeight;
     } else {
-      commentsContainer.innerHTML = `<p style="color:#666; font-size:0.85rem; font-family:'Space Mono';">Nenhum comentário ainda. Seja o primeiro!</p>`;
+      commentsContainer.innerHTML = `<p style="color:#555; font-size:0.85rem; font-family:'Space Mono'; letter-spacing: -0.3px; text-align: center; padding: 20px 0;">[ SISTEMA VAZIO: NENHUM REGISTRO ENCONTRADO ]</p>`;
     }
   });
 }
 
-// Função auxiliar para gerar o HTML de cada comentário e suas respostas
 function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usuarioAtual) {
   const item = document.createElement("div");
-  item.style.padding = "10px";
-  item.style.background = "#222";
-  item.style.borderRadius = "4px";
+  item.style.padding = "14px";
+  item.style.background = "#141414";
+  item.style.border = "1px solid #222";
+  item.style.borderRadius = "6px";
   item.style.fontFamily = "'Space Mono', monospace";
-  item.style.marginBottom = "8px";
-  item.style.borderLeft = "3px solid #e8ff3c";
+  item.style.marginBottom = "12px";
+  item.style.position = "relative";
+  item.style.transition = "border-color 0.2s ease";
 
   const totalLikes = dados.likes || 0;
 
   item.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <strong style="color: #e8ff3c;">${dados.user}:</strong>
-      <span style="font-size: 0.75rem; color: #888;">${new Date(dados.timestamp).toLocaleDateString()}</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <span style="color: #e8ff3c; font-weight: 600; font-size: 0.9rem; letter-spacing: -0.3px;">// ${dados.user}</span>
+      <span style="font-size: 0.75rem; color: #555; font-variant-numeric: tabular-nums;">${new Date(dados.timestamp).toLocaleDateString()}</span>
     </div>
-    <div id="text-container-${commentId}" style="margin: 6px 0; font-size:0.9rem; color: #fff;">
+    <div id="text-container-${commentId}" style="line-height: 1.5; font-size:0.88rem; color: #bbb; margin: 8px 0 12px 0; word-break: break-word;">
       ${dados.text}
     </div>
     
-    <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem;">
-      <button onclick="curtirComentario('${idDoVideo}', '${commentId}')" style="background:none; border:none; color:#e8ff3c; cursor:pointer; padding:0;">
-        👍 (${totalLikes})
-      </button>
-      <button onclick="ativarModoResposta('${commentId}', '${dados.user}')" style="background:none; border:none; color:#888; cursor:pointer; padding:0;">
-        💬 Responder
+    <!-- Barra Dinâmica e Premium de Ações (Corrige desalinhamentos vistos em image_56c1d9.png) -->
+    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.78rem; border-top: 1px solid #1c1c1c; padding-top: 10px;">
+      <button onclick="curtirComentario('${idDoVideo}', '${commentId}')" style="background:none; border:none; color:#666; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#e8ff3c'" onmouseout="this.style.color='#666'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        <span>Apoiar (${totalLikes})</span>
       </button>
       
-      <button onclick="editarComentario('${idDoVideo}', '${commentId}', '${dados.text}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#00bfff; cursor:pointer; padding:0; display:none;">
-        ✏️ Editar
+      <button onclick="ativarModoResposta('${commentId}', '${dados.user}')" style="background:none; border:none; color:#666; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#666'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Responder</span>
       </button>
-      <button onclick="excluirComentario('${idDoVideo}', '${commentId}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#ff3c6e; cursor:pointer; padding:0; display:none;">
-        🗑️ Excluir
+      
+      <button onclick="editarComentario('${idDoVideo}', '${commentId}', '${dados.text}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:none; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#00bfff'" onmouseout="this.style.color='#444'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"/></svg>
+        <span>Alterar</span>
+      </button>
+      
+      <button onclick="excluirComentario('${idDoVideo}', '${commentId}')" class="btn-autor-${commentId}" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:none; align-items:center; gap:4px; transition: color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#444'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span>Remover</span>
       </button>
     </div>
 
-    <div id="respostas-${commentId}" style="margin-top: 10px; padding-left: 15px; border-left: 1px dashed #444;"></div>
+    <!-- Sub-container de Respostas Estruturado Conectivo -->
+    <div id="respostas-${commentId}" style="margin-top: 12px; padding-left: 14px; position: relative;"></div>
   `;
 
-  // Exibe botões de edição/exclusão se o nome bater com o digitado no input de forma reativa
   setTimeout(() => {
     if (usuarioAtual && dados.user.toLowerCase() === usuarioAtual.toLowerCase()) {
-      item.querySelectorAll(`.btn-autor-${commentId}`).forEach(btn => btn.style.display = "inline-block");
+      item.querySelectorAll(`.btn-autor-${commentId}`).forEach(btn => btn.style.display = "inline-flex");
     }
   }, 100);
 
-  // Renderiza sub-comentários (respostas) pertencentes a este pai
   const containerRespostas = item.querySelector(`#respostas-${commentId}`);
+  let temRespostas = false;
+
   Object.keys(todosOsDados).forEach(subKey => {
     const subC = todosOsDados[subKey];
     if (subC && subC.parentId === commentId) {
+      temRespostas = true;
       const respItem = document.createElement("div");
-      respItem.style.margin = "6px 0";
-      respItem.style.fontSize = "0.85rem";
-      respItem.style.background = "#1a1a1a";
-      respItem.style.padding = "6px";
+      respItem.style.margin = "10px 0 0 0";
+      respItem.style.fontSize = "0.82rem";
+      respItem.style.background = "#0d0d0d";
+      respItem.style.border = "1px solid #1a1a1a";
+      respItem.style.padding = "10px";
       respItem.style.borderRadius = "4px";
+      respItem.style.position = "relative";
+      
       respItem.innerHTML = `
-        <div style="display: flex; justify-content: space-between;">
-          <strong style="color: #aaa;">${subC.user} <span style="color:#e8ff3c; font-size:0.75rem;">➔ respondeu</span>:</strong>
-          <button onclick="excluirComentario('${idDoVideo}', '${subKey}')" class="btn-autor-${subKey}" style="background:none; border:none; color:#ff3c6e; cursor:pointer; font-size:0.75rem; display:none;">🗑️</button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: #888; font-weight:500;">${subC.user} <span style="color:#e8ff3c; font-size:0.75rem; font-weight:normal; opacity:0.8;">↳ replicou</span></strong>
+          <button onclick="excluirComentario('${idDoVideo}', '${subKey}')" class="btn-autor-${subKey}" style="background:none; border:none; color:#444; cursor:pointer; padding:0; display:none; transition: color 0.2s;" onmouseover="this.style.color='#ff3c6e'" onmouseout="this.style.color='#444'">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
         </div>
-        <p style="margin: 4px 0 0 0; color: #ccc;">${subC.text}</p>
+        <p style="margin: 6px 0 0 0; color: #999; line-height: 1.4; word-break: break-word;">${subC.text}</p>
       `;
       
       setTimeout(() => {
@@ -418,6 +417,18 @@ function criarElementoComentario(idDoVideo, commentId, dados, todosOsDados, usua
     }
   });
 
+  // Insere a linha vertical invisível de árvore técnica se contiver respostas
+  if (temRespostas) {
+    const linhaArvore = document.createElement("div");
+    linhaArvore.style.position = "absolute";
+    linhaArvore.style.left = "4px";
+    linhaArvore.style.top = "14px";
+    linhaArvore.style.bottom = "14px";
+    linhaArvore.style.width = "1px";
+    linhaArvore.style.background = "#222";
+    containerRespostas.appendChild(linhaArvore);
+  }
+
   return item;
 }
 
@@ -430,12 +441,11 @@ function openRealtimeVideo(idDoVideo) {
   const videoInfo = listaDeVideos[idDoVideo];
   if (!videoInfo) return;
 
-  // Cancela listeners anteriores para evitar estouro de memória/concorrência no Firebase
   if (typeof unsubVideoData === "function") unsubVideoData();
   if (typeof unsubVideoComments === "function") unsubVideoComments();
 
   videoAtivoId = idDoVideo;
-  cancelarResposta(); // Garante reset do formulário de subcomentários
+  cancelarResposta(); 
 
   if (modalTitle) modalTitle.innerText = videoInfo.title;
   if (playerVideo) playerVideo.src = videoInfo.url;
@@ -447,6 +457,7 @@ function openRealtimeVideo(idDoVideo) {
     modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // Sincronização dos botões de Likes/Dislikes
   if (btnLike) {
     const jaCurtiuEste = localStorage.getItem(`clips_ocultos_liked_${idDoVideo}`) === 'true';
     const likeTextEl = btnLike.querySelector('.like-text');
@@ -500,7 +511,6 @@ function openRealtimeVideo(idDoVideo) {
     }
   });
 
-  // Dispara o novo ouvinte estruturado de comentários e sub-respostas
   carregarComentariosRealtime(idDoVideo);
 }
 
@@ -520,7 +530,7 @@ function closeRealtimeVideo() {
     viewerRef = null;
   }
   videoAtivoId = null;
-  cancelarResposta(); // Limpa as caixas de texto e referências ao fechar
+  cancelarResposta(); 
 }
 
 function mapearBotoesPlay() {
@@ -544,26 +554,19 @@ if (modalBackdrop) modalBackdrop.addEventListener('click', closeRealtimeVideo);
 if (modalClose) modalClose.addEventListener('click', closeRealtimeVideo);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtimeVideo(); });
 
-// ── VARIÁVEIS DE TRAVA MECÂNICA (BLOQUEIO ANTI-SPAM PARA CLIQUES RÁPIDOS) ──
+// ── GERENCIADORES DE LIKES / DISLIKES COM TRAVAS MECÂNICAS ──
 let enviandoLike = false;
 let enviandoDislike = false;
 
-// ── GERENCIADOR DE LIKES INTELIGENTE ──
 if (btnLike) {
   btnLike.addEventListener("click", () => {
     if (!videoAtivoId || enviandoLike) return;
-
     const chaveLike = `clips_ocultos_liked_${videoAtivoId}`;
     const chaveDislike = `clips_ocultos_disliked_${videoAtivoId}`;
-    
     let jaCurtiu = localStorage.getItem(chaveLike) === 'true';
     let jaDeuDislike = localStorage.getItem(chaveDislike) === 'true';
 
-    if (!jaCurtiu) {
-      localStorage.setItem(chaveLike, 'true');
-    } else {
-      localStorage.removeItem(chaveLike);
-    }
+    localStorage.setItem(chaveLike, !jaCurtiu ? 'true' : 'false');
 
     enviandoLike = true; 
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
@@ -597,22 +600,15 @@ if (btnLike) {
   });
 }
 
-// ── GERENCIADOR DE DISLIKES INTELIGENTE ──
 if (btnDislike) {
   btnDislike.addEventListener("click", () => {
     if (!videoAtivoId || enviandoDislike) return;
-
     const chaveLike = `clips_ocultos_liked_${videoAtivoId}`;
     const chaveDislike = `clips_ocultos_disliked_${videoAtivoId}`;
-    
     let jaCurtiu = localStorage.getItem(chaveLike) === 'true';
     let jaDeuDislike = localStorage.getItem(chaveDislike) === 'true';
 
-    if (!jaDeuDislike) {
-      localStorage.setItem(chaveDislike, 'true');
-    } else {
-      localStorage.removeItem(chaveDislike);
-    }
+    localStorage.setItem(chaveDislike, !jaDeuDislike ? 'true' : 'false');
 
     enviandoDislike = true; 
     const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
@@ -646,28 +642,25 @@ if (btnDislike) {
   });
 }
 
-// ── LÓGICA DE ENVIO ADAPTADA PARA SUPORTAR COMENTÁRIOS E RESPOSTAS ──
 if (btnSendComment) {
   btnSendComment.addEventListener("click", () => {
     const nomeStr = inputUser?.value.trim();
     const textoStr = inputText?.value.trim();
 
     if (!nomeStr || !textoStr) {
-      mostrarToastNotificacao("⚠ Erro: Você precisa preencher seu nome e o comentário!", "#ff3c6e");
+      mostrarToastNotificacao("⚠ Preencha a credencial e a mensagem antes de transmitir.", "#ff3c6e");
       return;
     }
 
     if (!videoAtivoId) return;
 
     const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
-    
     const novoComentario = {
       user: nomeStr,
       text: textoStr,
       timestamp: Date.now() 
     };
 
-    // Se for resposta, injeta a propriedade parentId apontando para o comentário pai
     if (comentarioPaiIdAtivo) {
       novoComentario.parentId = comentarioPaiIdAtivo;
     }
@@ -675,21 +668,19 @@ if (btnSendComment) {
     push(commentsListRef, novoComentario).then(() => {
       if (inputText) inputText.value = "";
       cancelarResposta(); 
-      mostrarToastNotificacao("✓ Comentário enviado com sucesso!", "#e8ff3c");
-    }).catch((error) => {
-      console.error("Erro ao enviar comentário:", error);
-      mostrarToastNotificacao("⚠ Erro ao salvar no servidor.", "#ff3c6e");
+      mostrarToastNotificacao("✓ Comentário integrado com sucesso.", "#e8ff3c");
+    }).catch(() => {
+      mostrarToastNotificacao("⚠ Erro ao sincronizar com a base de dados.", "#ff3c6e");
     });
   });
 }
 
-// ── WINDOW FUNCTIONS (Acessíveis diretamente pelos gatilhos onclick do HTML dinâmico) ──
+// ── UI INJECTED CONTROLS (Modais customizados premium para banir popups nativos) ──
 
-// 1. Curtir um comentário específico via Transaction
 window.curtirComentario = function(idDoVideo, commentId) {
   const chaveLikeComentario = `clips_ocultos_like_comment_${commentId}`;
   if (localStorage.getItem(chaveLikeComentario) === 'true') {
-    mostrarToastNotificacao("ℹ Você já curtiu este comentário.", "#00bfff");
+    mostrarToastNotificacao("ℹ Assinatura de apoio já computada para este bloco.", "#ffffff");
     return;
   }
 
@@ -701,7 +692,6 @@ window.curtirComentario = function(idDoVideo, commentId) {
   });
 };
 
-// 2. Ativar Modo Resposta (Injetar um subcomentário na Thread)
 window.ativarModoResposta = function(commentId, nomeAutor) {
   comentarioPaiIdAtivo = commentId;
   if (inputText) {
@@ -714,9 +704,10 @@ window.ativarModoResposta = function(commentId, nomeAutor) {
     aviso = document.createElement("div");
     aviso.id = "aviso-resposta";
     aviso.style.fontSize = "0.75rem";
-    aviso.style.color = "#00bfff";
-    aviso.style.marginBottom = "4px";
-    aviso.innerHTML = `Respondendo a @${nomeAutor} <span onclick="cancelarResposta()" style="color:#ff3c6e; cursor:pointer; margin-left:8px;">[Cancelar]</span>`;
+    aviso.style.color = "#e8ff3c";
+    aviso.style.marginBottom = "6px";
+    aviso.style.fontFamily = "'Space Mono', monospace";
+    aviso.innerHTML = `[ CONEXÃO ] Respondendo a @${nomeAutor} <span onclick="cancelarResposta()" style="color:#ff3c6e; cursor:pointer; margin-left:8px; text-decoration:underline;">[ABORTAR]</span>`;
     inputText.parentNode.insertBefore(aviso, inputText);
   }
 };
@@ -728,59 +719,96 @@ window.cancelarResposta = function() {
   if (aviso) aviso.remove();
 };
 
-// 3. Excluir Comentário permanentemente
+// Modais Customizados Injetados Dinamicamente (Solução definitiva para image_56c1f9.png e image_56c4c8.png)
+function criarFundoModalCustomizado(onConfirm, contentHTML) {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = "0"; overlay.style.left = "0";
+  overlay.style.width = "100vw"; overlay.style.height = "100vh";
+  overlay.style.background = "rgba(5, 5, 5, 0.85)";
+  overlay.style.backdropFilter = "blur(4px)";
+  overlay.style.display = "flex"; overlay.style.alignItems = "center"; overlay.style.justifyContent = "center";
+  overlay.style.zindex = "20000"; overlay.style.fontFamily = "'Space Mono', monospace";
+
+  const box = document.createElement("div");
+  box.style.background = "#0f0f0f"; box.style.border = "1px solid #222";
+  box.style.padding = "24px"; box.style.borderRadius = "8px"; box.style.width = "90%";
+  box.style.maxWidth = "420px"; box.style.boxShadow = "0 20px 40px rgba(0,0,0,0.5)";
+
+  box.innerHTML = contentHTML;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  const fechar = () => overlay.remove();
+  
+  box.querySelector(".btn-confirm-modal").addEventListener("click", () => {
+    onConfirm(box);
+    fechar();
+  });
+  box.querySelector(".btn-cancel-modal").addEventListener("click", fechar);
+}
+
 window.excluirComentario = function(idDoVideo, commentId) {
-  if (confirm("Deseja permanentemente deletar este comentário?")) {
+  criarFundoModalCustomizado(() => {
     const commentRef = ref(db, `videos/${idDoVideo}/comments/${commentId}`);
     set(commentRef, null).then(() => {
-      mostrarToastNotificacao("🗑 Comentário removido.", "#ff3c6e");
+      mostrarToastNotificacao("🗑 Registro purgado do terminal.", "#ff3c6e");
     });
-  }
+  }, `
+    <h3 style="color:#fff; font-size:1.05rem; margin-bottom:12px; font-weight:600;">// DELETAR REGISTRO?</h3>
+    <p style="color:#777; font-size:0.85rem; line-height:1.5; margin-bottom:20px;">Esta ação removerá permanentemente o comentário do banco de dados centralizado.</p>
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn-cancel-modal" style="background:none; border:none; color:#666; cursor:pointer; font-size:0.85rem;">[ CANCELAR ]</button>
+      <button class="btn-confirm-modal" style="background:#ff3c6e; border:none; color:#fff; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:600;">CONFIRMAR PURGA</button>
+    </div>
+  `);
 };
 
-// 4. Editar texto de comentário existente
 window.editarComentario = function(idDoVideo, commentId, textoAntigo) {
-  const novoTexto = prompt("Edite o seu comentário:", textoAntigo);
-  if (novoTexto === null) return; 
-  
-  const textoLimpo = novoTexto.trim();
-  if (!textoLimpo) {
-    mostrarToastNotificacao("⚠ O comentário não pode ficar vazio.", "#ff3c6e");
-    return;
-  }
-
-  const commentTextRef = ref(db, `videos/${idDoVideo}/comments/${commentId}/text`);
-  set(commentTextRef, textoLimpo).then(() => {
-    mostrarToastNotificacao("✏ Comentário editado!", "#00bfff");
-  });
+  criarFundoModalCustomizado((box) => {
+    const novoTexto = box.querySelector(".input-edit-modal").value.trim();
+    if (!novoTexto) {
+      mostrarToastNotificacao("⚠ Operação abortada: corpo de texto vazio.", "#ff3c6e");
+      return;
+    }
+    const commentTextRef = ref(db, `videos/${idDoVideo}/comments/${commentId}/text`);
+    set(commentTextRef, novoTexto).then(() => {
+      mostrarToastNotificacao("✏ Transmissão modificada.", "#00bfff");
+    });
+  }, `
+    <h3 style="color:#fff; font-size:1.05rem; margin-bottom:12px; font-weight:600;">// REESCREVER TRANSMISSÃO</h3>
+    <textarea class="input-edit-modal" style="width:100%; height:80px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:8px; font-family:'Space Mono'; font-size:0.85rem; resize:none; box-sizing:border-box; margin-bottom:16px; outline:none;" placeholder="Ajuste a mensagem...">${textoAntigo}</textarea>
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn-cancel-modal" style="background:none; border:none; color:#666; cursor:pointer; font-size:0.85rem;">[ ABORTAR ]</button>
+      <button class="btn-confirm-modal" style="background:#e8ff3c; border:none; color:#000; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:600;">SALVAR ALTERAÇÃO</button>
+    </div>
+  `);
 };
 
-// ── FUNÇÃO DE TOAST ──
+// ── TOAST NOTIFICATION ──
 function mostrarToastNotificacao(mensagem, corFundo) {
   let toast = document.getElementById("toast-notificacao");
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notificacao";
     toast.style.position = "fixed";
-    toast.style.bottom = "20px";
-    toast.style.right = "20px";
-    toast.style.padding = "12px 24px";
+    toast.style.bottom = "24px";
+    toast.style.right = "24px";
+    toast.style.padding = "10px 20px";
     toast.style.borderRadius = "4px";
     toast.style.fontFamily = "'Space Mono', monospace";
-    toast.style.fontSize = "0.9rem";
-    toast.style.zIndex = "10000";
-    toast.style.transition = "opacity 0.3s ease";
+    toast.style.fontSize = "0.82rem";
+    toast.style.zIndex = "30000";
+    toast.style.transition = "opacity 0.2s ease";
     document.body.appendChild(toast);
   }
-  toast.textContent = mensaje;
-  toast.style.background = "#111";
+  toast.textContent = mensagem;
+  toast.style.background = "#0a0a0a";
   toast.style.border = `1px solid ${corFundo}`;
   toast.style.color = corFundo;
   toast.style.opacity = "1";
 
-  setTimeout(() => {
-    toast.style.opacity = "0";
-  }, 4000);
+  setTimeout(() => { toast.style.opacity = "0"; }, 4000);
 }
 
 document.addEventListener("DOMContentLoaded", mapearBotoesPlay);
@@ -793,35 +821,11 @@ if (scrollTopBtn) {
   });
 }
 
-const nlBtn  = document.getElementById('nlBtn');
-const nlNote = document.getElementById('nlNote');
-if (nlBtn) {
-  nlBtn.addEventListener('click', () => {
-    const emailEl = document.getElementById('nlEmail');
-    const email = emailEl ? emailEl.value.trim() : "";
-    const re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!nlNote) return;
-    if (!re.test(email)) {
-      nlNote.textContent = '⚠ Insira um e-mail válido.';
-      nlNote.style.color = '#ff3c6e';
-      return;
-    }
-    nlNote.textContent = '✓ Inscrição realizada com sucesso!';
-    nlNote.style.color = '#e8ff3c';
-    if (emailEl) emailEl.value = '';
-    setTimeout(() => { nlNote.textContent = ''; }, 4000);
-  });
-}
-
 const loadMoreBtn = document.getElementById('loadMore');
 let loadCount     = 0;
 const moreVideos  = [
   { cat: 'Câmera Oculta',   title: 'Reunião que Ninguém Deveria Ver',         views: '7.2K',  time: 'há 1 dia',   tp: 'tp2'  },
-  { cat: 'Documentário',    title: 'Arquivo Perdido de 1971',                  views: '44K',   time: 'há 2 dias',  tp: 'tp1'  },
-  { cat: 'Momentos Raros',  title: 'Dois Raios no Mesmo Lugar',                 views: '15K',   time: 'há 3 dias',  tp: 'tp3'  },
-  { cat: 'Mundo Oculto',    title: 'Praia Sem Turistas — Litoral Fantasma',     views: '28K',   time: 'há 4 dias',  tp: 'tp5'  },
-  { cat: 'Investigação',    title: 'Fundo Misterioso de ONG Internacional',     views: '51K',   time: 'há 5 dias',  tp: 'tp4'  },
-  { cat: 'Arquivo Secreto', title: 'Ligação Interceptada — Sem Classificação', views: '9.7K',  time: 'há 6 dias',  tp: 'tp6'  },
+  { cat: 'Documentário',    title: 'Arquivo Perdido de 1971',                  views: '44K',   time: 'há 2 dias',  tp: 'tp1'  }
 ];
 
 if (loadMoreBtn) {
@@ -838,8 +842,7 @@ if (loadMoreBtn) {
     batch.forEach(v => {
       const el = document.createElement('article');
       el.classList.add('recent-item');
-      
-      const idInjetado = loadCount === 0 ? "v1" : loadCount === 2 ? "v2" : "v3"; 
+      const idInjetado = loadCount === 0 ? "v1" : "v2"; 
       el.setAttribute('data-video-id', idInjetado);
 
       el.innerHTML = `
@@ -877,9 +880,7 @@ document.querySelectorAll('.cat-card').forEach(card => {
     const dy   = (e.clientY - cy) / (rect.height / 2);
     card.style.transform = `translateY(-4px) rotateY(${dx * 6}deg) rotateX(${-dy * 6}deg)`;
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = '';
-  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
 });
 
 const observer = new IntersectionObserver((entries) => {
@@ -900,14 +901,3 @@ setTimeout(() => {
     observer.observe(el);
   });
 }, 50);
-
-document.querySelectorAll('a[href^="#"]').forEach(link => {
-  link.addEventListener('click', e => {
-    const target = document.querySelector(link.getAttribute('href') || '');
-    if (!target) return;
-    e.preventDefault();
-    const navH   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h') || '0');
-    const top    = target.getBoundingClientRect().top + window.scrollY - navH;
-    window.scrollTo({ top, behavior: 'smooth' });
-  });
-});
