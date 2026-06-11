@@ -1570,3 +1570,186 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.1ms !important; }
 }
+
+
+/* ── BARRA DE INTERAÇÕES ULTRA PREMIUM (MODAL) ── */
+.modal-video-details {
+  padding: 25px;
+  color: #ffffff;
+  background: #0a0a0a;
+  border-top: 1px solid rgba(232, 255, 60, 0.1);
+}
+
+#modalVideoTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.video-realtime-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+/* Botão Like Estilo Ciberpunk/Premium */
+.premium-like-btn {
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-like-btn .heart-icon {
+  transition: transform 0.3s ease, fill 0.3s ease;
+}
+
+.premium-like-btn:hover {
+  background: rgba(255, 60, 110, 0.08);
+  border-color: #ff3c6e;
+  color: #ff3c6e;
+  box-shadow: 0 0 15px rgba(255, 60, 110, 0.2);
+}
+
+.premium-like-btn:hover .heart-icon {
+  transform: scale(1.15);
+}
+
+/* Estado quando o usuário já curtiu (Ativo) */
+.premium-like-btn.liked {
+  background: #ff3c6e;
+  border-color: #ff3c6e;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 60, 110, 0.4);
+}
+
+.premium-like-btn.liked .heart-icon {
+  fill: #ffffff;
+  stroke: #ffffff;
+}
+
+.like-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.premium-like-btn.liked .like-divider {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Grupo de Status */
+.premium-stats-group {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.premium-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: #888888;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.premium-stat-item strong {
+  color: #ffffff;
+}
+
+/* Indicador de Transmissão Ao Vivo */
+.live-pulse {
+  color: #e8ff3c !important;
+  border-color: rgba(232, 255, 60, 0.1);
+  background: rgba(232, 255, 60, 0.02);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #e8ff3c;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #e8ff3c;
+  animation: premiumPulse 2s infinite;
+}
+
+@keyframes premiumPulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 14px #e8ff3c; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+/* Formulário de comentários refinado */
+.comment-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.comment-form input {
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  padding: 12px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.comment-form input:focus {
+  outline: none;
+  border-color: #e8ff3c;
+  box-shadow: 0 0 10px rgba(232, 255, 60, 0.1);
+}
+
+#commentUser { width: 25%; }
+#commentText { width: 75%; }
+
+.comment-form button {
+  background: #e8ff3c;
+  color: #000000;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  padding: 0 24px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.comment-form button:hover {
+  background: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+#commentsContainer {
+  max-height: 220px;
+  overflow-y: auto;
+  background: #0f0f0f;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
