@@ -1753,3 +1753,56 @@ body::before {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
+
+/* ==========================================================================
+   NOVO: Botão Dislike Estilo Ciberpunk/Premium (Adicionar no seu CSS)
+   ========================================================================== */
+
+.premium-dislike-btn {
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-dislike-btn .dislike-icon {
+  transition: transform 0.3s ease, fill 0.3s ease;
+}
+
+.premium-dislike-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #888888;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Quando passa o mouse, faz o ícone de dislike dar um leve tranco para baixo */
+.premium-dislike-btn:hover .dislike-icon {
+  transform: rotate(180deg) scale(1.15) translateY(1px);
+}
+
+/* Estado ativo: Quando o usuário clicou em descurtir */
+.premium-dislike-btn.disliked {
+  background: #333333;
+  border-color: #555555;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.premium-dislike-btn.disliked .dislike-icon {
+  fill: #ffffff;
+  stroke: #ffffff;
+}
+
+.premium-dislike-btn.disliked .like-divider {
+  background: rgba(255, 255, 255, 0.4);
+}
