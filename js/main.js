@@ -1,8 +1,9 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Premium & Realtime)
+   CLIPES OCULTOS — main.js (Firebase Corrigido)
 ══════════════════════════════════════════ */
 
 // ── 1. VARIÁVEIS DO BOTÃO E ANIMAÇÃO INICIAL ──────────────────
+// Colocadas no topo para funcionarem imediatamente, independente do Firebase
 const introCanvas = document.getElementById('intro-canvas');
 const ictx = introCanvas?.getContext('2d');
 let particles = [];
@@ -328,10 +329,18 @@ function openRealtimeVideo(idDoVideo) {
     }
   }
 
-  const viewsRef = ref(db, `videos/${idDoVideo}/views`);
-  runTransaction(viewsRef, (currentViews) => {
-    return (currentViews || 0) + 1;
-  });
+  // TRAVA DE VIEW REPETIDA: Só adiciona +1 se o usuário nunca viu esse vídeo antes nesta sessão/navegador
+  const chaveViewStorage = `clips_ocultos_viewed_${idDoVideo}`;
+  const jaViuEsteVideo = localStorage.getItem(chaveViewStorage) === 'true';
+
+  if (!jaViuEsteVideo) {
+    const viewsRef = ref(db, `videos/${idDoVideo}/views`);
+    runTransaction(viewsRef, (currentViews) => {
+      return (currentViews || 0) + 1;
+    }).then(() => {
+      localStorage.setItem(chaveViewStorage, 'true');
+    }).catch((error) => console.error("Erro ao computar view única:", error));
+  }
 
   const onlineRef = ref(db, `videos/${idDoVideo}/online/${Date.now()}`);
   set(onlineRef, true);
@@ -553,32 +562,4 @@ document.querySelectorAll('.cat-card').forEach(card => {
   });
 });
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.style.opacity    = '1';
-      entry.target.style.transform  = 'translateY(0)';
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.1 });
-
-setTimeout(() => {
-  document.querySelectorAll('.cat-card, .video-card, .recent-item').forEach(el => {
-    el.style.opacity    = '0';
-    el.style.transform  = 'translateY(24px)';
-    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    observer.observe(el);
-  });
-}, 50);
-
-document.querySelectorAll('a[href^="#"]').forEach(link => {
-  link.addEventListener('click', e => {
-    const target = document.querySelector(link.getAttribute('href') || '');
-    if (!target) return;
-    e.preventDefault();
-    const navH   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h') || '0');
-    const top    = target.getBoundingClientRect().top + window.scrollY - navH;
-    window.scrollTo({ top, behavior: 'smooth' });
-  });
-});
+// Salve o arquivo e limpe o cache do navegador para testar a mágica!
