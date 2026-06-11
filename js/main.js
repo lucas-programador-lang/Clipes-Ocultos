@@ -8,13 +8,13 @@ import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } fr
 
 // TODO: Substitua pelos dados do seu projeto gerado no Console do Firebase
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
-  projectId: "SEU_PROJETO",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyBeG82FG84I1k3VN3PbfRjON7C-cX5FMjU",
+  authDomain: "clipes-ocultos.firebaseapp.com",
+  databaseURL: "https://clipes-ocultos-default-rtdb.firebaseio.com",
+  projectId: "clipes-ocultos",
+  storageBucket: "clipes-ocultos.firebasestorage.app",
+  messagingSenderId: "683346960432",
+  appId: "1:683346960432:web:9603b865aef1f59f030df5"
 };
 
 const app = initializeApp(firebaseConfig);
