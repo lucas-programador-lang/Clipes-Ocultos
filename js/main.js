@@ -1,12 +1,38 @@
 /* ══════════════════════════════════════════
-   CLIPES OCULTOS — main.js (Firebase Realtime)
+   CLIPES OCULTOS — main.js (Firebase Corrigido)
 ══════════════════════════════════════════ */
 
-// ── CONEXÃO COM O FIREBASE ───────────────────────────────
+// ── 1. VARIÁVEIS DO BOTÃO E ANIMAÇÃO INICIAL ──────────────────
+// Colocadas no topo para funcionarem imediatamente, independente do Firebase
+const introCanvas = document.getElementById('intro-canvas');
+const ictx = introCanvas?.getContext('2d');
+let particles = [];
+const NUM_PARTICLES = 90;
+let introAnimId;
+
+const enterBtn     = document.getElementById('enter-btn');
+const introEl      = document.getElementById('intro');
+const mainSite     = document.getElementById('main-site');
+
+// ── 2. ACIONAMENTO DO BOTÃO ENTRAR (À PROVA DE TRAVAMENTOS) ───
+if (enterBtn) {
+  enterBtn.addEventListener('click', () => {
+    if (introEl) introEl.classList.add('fade-out');
+    setTimeout(() => {
+      if (introEl) introEl.style.display = 'none';
+      if (mainSite) mainSite.classList.remove('hidden');
+      cancelAnimationFrame(introAnimId);
+      initHeroCanvas();
+      animateCounters();
+      generateNoise();
+    }, 800);
+  });
+}
+
+// ── 3. CARREGAMENTO DO FIREBASE VIA MÓDULO SEGURO ──────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, runTransaction, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// TODO: Substitua pelos dados do seu projeto gerado no Console do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBeG82FG84I1k3VN3PbfRjON7C-cX5FMjU",
   authDomain: "clipes-ocultos.firebaseapp.com",
@@ -17,11 +43,11 @@ const firebaseConfig = {
   appId: "1:683346960432:web:9603b865aef1f59f030df5"
 };
 
+// Inicializa as conexões com segurança
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // ── BANCO DE DADOS LOCAL DOS VÍDEOS MP4 ──────────────────
-// Insira as rotas reais dos seus arquivos .mp4 aqui
 const listaDeVideos = {
   "v1": { title: "O Arquivo que Quase Desapareceu", url: "videos/arquivo.mp4" },
   "v2": { title: "Dentro da Sala Proibida", url: "videos/sala.mp4" },
@@ -51,7 +77,7 @@ const inputUser = document.getElementById("commentUser");
 const inputText = document.getElementById("commentText");
 const commentsContainer = document.getElementById("commentsContainer");
 
-// Ouvinte do Ranking Global (Atualiza a Home baseado nos cliques reais de todos os usuários)
+// Ouvinte do Ranking Global (Contador do topo)
 function monitorarRankingGlobal() {
   const videosRef = ref(db, 'videos/');
   onValue(videosRef, (snapshot) => {
@@ -63,7 +89,6 @@ function monitorarRankingGlobal() {
       somaViewsGerais += data[id].views || 0;
     });
 
-    // Injeta a soma real de views de pessoas reais no contador do topo do site
     const countViewsEl = document.getElementById('count-views');
     if (countViewsEl) {
       countViewsEl.textContent = somaViewsGerais >= 1000000 
@@ -74,23 +99,19 @@ function monitorarRankingGlobal() {
 }
 monitorarRankingGlobal();
 
-// ── INTRO CANVAS (particle web) ──────────────────────────
-const introCanvas = document.getElementById('intro-canvas');
-const ictx = introCanvas.getContext('2d');
-let particles = [];
-const NUM_PARTICLES = 90;
-
+// ── PARTICLE CANVAS ENGINE ───────────────────────────────
 function resizeIntroCanvas() {
+  if (!introCanvas) return;
   introCanvas.width  = window.innerWidth;
   introCanvas.height = window.innerHeight;
 }
-resizeIntroCanvas();
+if (introCanvas) resizeIntroCanvas();
 
 class Particle {
   constructor() { this.reset(); }
   reset() {
-    this.x  = Math.random() * introCanvas.width;
-    this.y  = Math.random() * introCanvas.height;
+    this.x  = Math.random() * (introCanvas?.width || 800);
+    this.y  = Math.random() * (introCanvas?.height || 600);
     this.vx = (Math.random() - 0.5) * 0.4;
     this.vy = (Math.random() - 0.5) * 0.4;
     this.r  = Math.random() * 2 + 0.5;
@@ -99,10 +120,13 @@ class Particle {
   update() {
     this.x += this.vx;
     this.y += this.vy;
-    if (this.x < 0 || this.x > introCanvas.width)  this.vx *= -1;
-    if (this.y < 0 || this.y > introCanvas.height)  this.vy *= -1;
+    if (introCanvas) {
+      if (this.x < 0 || this.x > introCanvas.width)  this.vx *= -1;
+      if (this.y < 0 || this.y > introCanvas.height)  this.vy *= -1;
+    }
   }
   draw() {
+    if (!ictx) return;
     ictx.beginPath();
     ictx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
     ictx.fillStyle = `rgba(232,255,60,${this.a})`;
@@ -110,9 +134,12 @@ class Particle {
   }
 }
 
-for (let i = 0; i < NUM_PARTICLES; i++) particles.push(new Particle());
+if (introCanvas) {
+  for (let i = 0; i < NUM_PARTICLES; i++) particles.push(new Particle());
+}
 
 function drawLines() {
+  if (!ictx) return;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const dx   = particles[i].x - particles[j].x;
@@ -130,8 +157,8 @@ function drawLines() {
   }
 }
 
-let introAnimId;
 function animateIntro() {
+  if (!introCanvas) return;
   introAnimId = requestAnimationFrame(animateIntro);
   ictx.clearRect(0, 0, introCanvas.width, introCanvas.height);
   particles.forEach(p => { p.update(); p.draw(); });
@@ -140,29 +167,13 @@ function animateIntro() {
 animateIntro();
 window.addEventListener('resize', resizeIntroCanvas);
 
-// ── ENTER BUTTON ──────────────────────────────────────────
-const enterBtn     = document.getElementById('enter-btn');
-const introEl      = document.getElementById('intro');
-const mainSite     = document.getElementById('main-site');
-
-enterBtn.addEventListener('click', () => {
-  introEl.classList.add('fade-out');
-  setTimeout(() => {
-    introEl.style.display = 'none';
-    mainSite.classList.remove('hidden');
-    cancelAnimationFrame(introAnimId);
-    initHeroCanvas();
-    animateCounters();
-    generateNoise();
-  }, 800);
-});
-
 // ── HERO CANVAS (floating grid) ──────────────────────────
 const heroCanvas = document.getElementById('hero-canvas');
 let hctx;
 let heroAnimId;
 
 function initHeroCanvas() {
+  if (!heroCanvas) return;
   hctx = heroCanvas.getContext('2d');
   resizeHeroCanvas();
   window.addEventListener('resize', resizeHeroCanvas);
@@ -170,12 +181,14 @@ function initHeroCanvas() {
 }
 
 function resizeHeroCanvas() {
+  if (!heroCanvas) return;
   heroCanvas.width  = heroCanvas.offsetWidth;
   heroCanvas.height = heroCanvas.offsetHeight;
 }
 
 let heroTime = 0;
 function animateHero() {
+  if (!heroCanvas || !hctx) return;
   heroAnimId = requestAnimationFrame(animateHero);
   heroTime += 0.005;
   const w = heroCanvas.width;
@@ -246,22 +259,24 @@ function animateCounters() {
 // ── NAVBAR SCROLL ────────────────────────────────────────
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 50);
+  if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
   const scrollTopBtn = document.getElementById('scrollTop');
-  scrollTopBtn.classList.toggle('hidden', window.scrollY < 400);
+  if (scrollTopBtn) scrollTopBtn.classList.toggle('hidden', window.scrollY < 400);
 });
 
 // ── HAMBURGER ────────────────────────────────────────────
 const hamburger  = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  mobileMenu.classList.toggle('open');
-});
+if (hamburger && mobileMenu) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+}
 document.querySelectorAll('.mob-link').forEach(link => {
   link.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    mobileMenu.classList.remove('open');
+    hamburger?.classList.remove('open');
+    mobileMenu?.classList.remove('open');
   });
 });
 
@@ -271,14 +286,18 @@ const searchBar    = document.getElementById('searchBar');
 const searchClose  = document.getElementById('searchClose');
 const searchInput  = document.getElementById('searchInput');
 
-searchToggle.addEventListener('click', () => {
-  searchBar.classList.toggle('open');
-  if (searchBar.classList.contains('open')) searchInput.focus();
-});
-searchClose.addEventListener('click', () => {
-  searchBar.classList.remove('open');
-  searchInput.value = '';
-});
+if (searchToggle && searchBar) {
+  searchToggle.addEventListener('click', () => {
+    searchBar.classList.toggle('open');
+    if (searchBar.classList.contains('open') && searchInput) searchInput.focus();
+  });
+}
+if (searchClose && searchBar) {
+  searchClose.addEventListener('click', () => {
+    searchBar.classList.remove('open');
+    if (searchInput) searchInput.value = '';
+  });
+}
 
 // ── REALTIME MODAL ENGINE ────────────────────────────────
 const modal         = document.getElementById('videoModal');
@@ -290,40 +309,37 @@ function openRealtimeVideo(idDoVideo) {
   if (!videoInfo) return;
 
   videoAtivoId = idDoVideo;
-  modalTitle.innerText = videoInfo.title;
-  playerVideo.src = videoInfo.url;
+  if (modalTitle) modalTitle.innerText = videoInfo.title;
+  if (playerVideo) playerVideo.src = videoInfo.url;
   
-  modal.classList.remove('hidden');
+  if (modal) modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
-  // 1. Incrementa visualização histórica (Transação segura)
   const viewsRef = ref(db, `videos/${idDoVideo}/views`);
   runTransaction(viewsRef, (currentViews) => {
     return (currentViews || 0) + 1;
   });
 
-  // 2. Sistema de presença de usuários online assistindo ao mesmo tempo
   const onlineRef = ref(db, `videos/${idDoVideo}/online/${Date.now()}`);
   set(onlineRef, true);
-  onDisconnect(onlineRef).remove(); // Se cair ou fechar a aba, apaga o registro do banco
+  onDisconnect(onlineRef).remove();
   viewerRef = onlineRef;
 
-  // 3. Ouvinte contínuo de contadores (Likes, Views e Ativos)
   const dataRef = ref(db, `videos/${idDoVideo}`);
   onValue(dataRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
-      countLikesSpan.innerText = data.likes || 0;
-      totalViewsSpan.innerText = (data.views || 0).toLocaleString('pt-BR');
+      if (countLikesSpan) countLikesSpan.innerText = data.likes || 0;
+      if (totalViewsSpan) totalViewsSpan.innerText = (data.views || 0).toLocaleString('pt-BR');
       
       const totalOnline = data.online ? Object.keys(data.online).length : 1;
-      onlineViewsSpan.innerText = totalOnline;
+      if (onlineViewsSpan) onlineViewsSpan.innerText = totalOnline;
     }
   });
 
-  // 4. Fluxo contínuo de Comentários
   const commentsRef = ref(db, `videos/${idDoVideo}/comments`);
   onValue(commentsRef, (snapshot) => {
+    if (!commentsContainer) return;
     commentsContainer.innerHTML = "";
     const data = snapshot.val();
     if (data) {
@@ -345,12 +361,13 @@ function openRealtimeVideo(idDoVideo) {
 }
 
 function closeRealtimeVideo() {
-  playerVideo.pause();
-  playerVideo.src = "";
-  modal.classList.add('hidden');
+  if (playerVideo) {
+    playerVideo.pause();
+    playerVideo.src = "";
+  }
+  if (modal) modal.classList.add('hidden');
   document.body.style.overflow = '';
 
-  // Desconecta o usuário do status de visualização ativa imediatamente
   if (viewerRef) {
     set(viewerRef, null);
     viewerRef = null;
@@ -358,77 +375,80 @@ function closeRealtimeVideo() {
   videoAtivoId = null;
 }
 
-// Intercepta os cliques e descobre qual vídeo abrir com base na posição indexada dos elementos
 function mapearBotoesPlay() {
   document.querySelectorAll('.video-card, .recent-item').forEach((card, index) => {
-    // Remove listeners antigos clonando o nó (evita conflitos e múltiplas execuções)
     const newCard = card.cloneNode(true);
     card.parentNode.replaceChild(newCard, card);
     
     newCard.addEventListener('click', (e) => {
       e.preventDefault();
-      // Mapeia v1, v2, v3 seguindo a ordem natural que já existe no HTML
       openRealtimeVideo(`v${index + 1}`);
     });
   });
 }
 
-modalBackdrop.addEventListener('click', closeRealtimeVideo);
-modalClose.addEventListener('click', closeRealtimeVideo);
+if (modalBackdrop) modalBackdrop.addEventListener('click', closeRealtimeVideo);
+if (modalClose) modalClose.addEventListener('click', closeRealtimeVideo);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRealtimeVideo(); });
 
-// Evento do Botão de Curtir (Like)
-btnLike.addEventListener("click", () => {
-  if (!videoAtivoId) return;
-  const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
-  runTransaction(likesRef, (currentLikes) => {
-    return (currentLikes || 0) + 1;
+if (btnLike) {
+  btnLike.addEventListener("click", () => {
+    if (!videoAtivoId) return;
+    const likesRef = ref(db, `videos/${videoAtivoId}/likes`);
+    runTransaction(likesRef, (currentLikes) => {
+      return (currentLikes || 0) + 1;
+    });
   });
-});
+}
 
-// Evento para Enviar um Comentário Novo
-btnSendComment.addEventListener("click", () => {
-  const nomeStr = inputUser.value.trim() || "Anônimo";
-  const textoStr = inputText.value.trim();
+if (btnSendComment) {
+  btnSendComment.addEventListener("click", () => {
+    const nomeStr = inputUser?.value.trim() || "Anônimo";
+    const textoStr = inputText?.value.trim();
 
-  if (!textoStr || !videoAtivoId) return;
+    if (!textoStr || !videoAtivoId) return;
 
-  const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
-  push(commentsListRef, {
-    user: nomeStr,
-    text: textoStr,
-    timestamp: Date.now()
+    const commentsListRef = ref(db, `videos/${videoAtivoId}/comments`);
+    push(commentsListRef, {
+      user: nomeStr,
+      text: textoStr,
+      timestamp: Date.now()
+    });
+
+    if (inputText) inputText.value = "";
   });
+}
 
-  inputText.value = "";
-});
-
-// Executa o mapeamento inicial ao carregar a página
 document.addEventListener("DOMContentLoaded", mapearBotoesPlay);
 
-// ── SCROLL TOP ───────────────────────────────────────────
-document.getElementById('scrollTop').addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+// ── SCROLL TOP & NEWSLETTER & LOAD MORE ──────────────────
+const scrollTopBtn = document.getElementById('scrollTop');
+if (scrollTopBtn) {
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 
-// ── NEWSLETTER ───────────────────────────────────────────
 const nlBtn  = document.getElementById('nlBtn');
 const nlNote = document.getElementById('nlNote');
-nlBtn.addEventListener('click', () => {
-  const email = document.getElementById('nlEmail').value.trim();
-  const re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!re.test(email)) {
-    nlNote.textContent = '⚠ Insira um e-mail válido.';
-    nlNote.style.color = '#ff3c6e';
-    return;
-  }
-  nlNote.textContent = '✓ Inscrição realizada com sucesso!';
-  nlNote.style.color = '#e8ff3c';
-  document.getElementById('nlEmail').value = '';
-  setTimeout(() => { nlNote.textContent = ''; }, 4000);
-});
+if (nlBtn) {
+  nlBtn.addEventListener('click', () => {
+    const emailEl = document.getElementById('nlEmail');
+    const email = emailEl ? emailEl.value.trim() : "";
+    const re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!nlNote) return;
+    if (!re.test(email)) {
+      nlNote.textContent = '⚠ Insira um e-mail válido.';
+      nlNote.style.color = '#ff3c6e';
+      return;
+    }
+    nlNote.textContent = '✓ Inscrição realizada com sucesso!';
+    nlNote.style.color = '#e8ff3c';
+    if (emailEl) emailEl.value = '';
+    setTimeout(() => { nlNote.textContent = ''; }, 4000);
+  });
+}
 
-// ── LOAD MORE ────────────────────────────────────────────
 const loadMoreBtn = document.getElementById('loadMore');
 let loadCount     = 0;
 const moreVideos  = [
@@ -440,45 +460,46 @@ const moreVideos  = [
   { cat: 'Arquivo Secreto', title: 'Ligação Interceptada — Sem Classificação', views: '9.7K',  time: 'há 6 dias',  tp: 'tp6'  },
 ];
 
-loadMoreBtn.addEventListener('click', () => {
-  if (loadCount >= moreVideos.length) {
-    loadMoreBtn.textContent = 'Sem mais vídeos por agora';
-    loadMoreBtn.disabled    = true;
-    return;
-  }
-  const batch = moreVideos.slice(loadCount, loadCount + 2);
-  const list  = document.getElementById('recentsList');
-  batch.forEach(v => {
-    const el = document.createElement('article');
-    el.classList.add('recent-item');
-    el.innerHTML = `
-      <div class="recent-thumb">
-        <div class="thumb-placeholder ${v.tp}" style="width:100%;height:100%;"></div>
-        <span class="video-duration">${(Math.random()*10+1).toFixed(0)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}</span>
-      </div>
-      <div class="recent-info">
-        <span class="video-cat">${v.cat}</span>
-        <h3>${v.title}</h3>
-        <div class="video-meta"><span>${v.views} views</span><span>· ${v.time}</span></div>
-      </div>`;
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener('click', () => {
+    if (loadCount >= moreVideos.length) {
+      loadMoreBtn.textContent = 'Sem mais vídeos por agora';
+      loadMoreBtn.disabled    = true;
+      return;
+    }
+    const batch = moreVideos.slice(loadCount, loadCount + 2);
+    const list  = document.getElementById('recentsList');
+    if (!list) return;
     
-    // Animação de entrada
-    el.style.opacity   = '0';
-    el.style.transform = 'translateY(16px)';
-    list.appendChild(el);
-    requestAnimationFrame(() => {
-      el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      el.style.opacity    = '1';
-      el.style.transform  = 'translateY(0)';
+    batch.forEach(v => {
+      const el = document.createElement('article');
+      el.classList.add('recent-item');
+      el.innerHTML = `
+        <div class="recent-thumb">
+          <div class="thumb-placeholder ${v.tp}" style="width:100%;height:100%;"></div>
+          <span class="video-duration">${(Math.random()*10+1).toFixed(0)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}</span>
+        </div>
+        <div class="recent-info">
+          <span class="video-cat">${v.cat}</span>
+          <h3>${v.title}</h3>
+          <div class="video-meta"><span>${v.views} views</span><span>· ${v.time}</span></div>
+        </div>`;
+      
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(16px)';
+      list.appendChild(el);
+      requestAnimationFrame(() => {
+        el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        el.style.opacity    = '1';
+        el.style.transform  = 'translateY(0)';
+      });
     });
+    loadCount += 2;
+    mapearBotoesPlay();
   });
-  loadCount += 2;
-  
-  // Remapeia novos elementos criados no DOM para vincularem ao Firebase
-  mapearBotoesPlay();
-});
+}
 
-// ── CATEGORY CARD HOVER TILT ──────────────────────────────
+// ── EFFECTS & OBSERVERS ──────────────────────────────────
 document.querySelectorAll('.cat-card').forEach(card => {
   card.addEventListener('mousemove', e => {
     const rect = card.getBoundingClientRect();
@@ -493,7 +514,6 @@ document.querySelectorAll('.cat-card').forEach(card => {
   });
 });
 
-// ── INTERSECTION OBSERVER ────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -513,13 +533,12 @@ setTimeout(() => {
   });
 }, 50);
 
-// ── SMOOTH ANCHOR SCROLL ─────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   link.addEventListener('click', e => {
-    const target = document.querySelector(link.getAttribute('href'));
+    const target = document.querySelector(link.getAttribute('href') || '');
     if (!target) return;
     e.preventDefault();
-    const navH   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
+    const navH   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h') || '0');
     const top    = target.getBoundingClientRect().top + window.scrollY - navH;
     window.scrollTo({ top, behavior: 'smooth' });
   });
