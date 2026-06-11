@@ -1859,3 +1859,30 @@ body::before {
     font-size: 1.1rem !important;
   }
 }
+
+/* ==========================================================================
+   CORREÇÃO DE RESPONSIVIDADE E ZOOM DO PLAYER DE VÍDEO
+   ========================================================================== */
+
+/* 1. Garante que o contêiner do modal/wrapper não extrapole os limites da tela */
+.modal-content, 
+.video-container,
+.video-wrapper { 
+  max-width: 90vw !important;  /* Impede que o bloco seja maior que 90% da largura da tela */
+  max-height: 85vh !important; /* Impede que seja maior que 85% da altura da tela */
+  width: 100% !important;
+  box-sizing: border-box !important; /* Garante que padding/bordas não alterem o tamanho total */
+  overflow: hidden !important; /* Garante que o vídeo respeite os cantos arredondados (border-radius) */
+}
+
+/* 2. Força a tag <video> ou <iframe> a se ajustar ao contêiner e manter a proporção */
+.modal-content video,
+.video-wrapper video,
+#modalVideo {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important; /* Mantém a proporção do vídeo sem esticar ou cortar */
+  border-radius: inherit !important; /* Herda os cantos arredondados perfeitos do elemento pai */
+}
