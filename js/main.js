@@ -393,28 +393,45 @@ function animateCounters() {
 }
 
 // ── PROCESSADOR DE RUÍDO ESTÁTICO (TV NOISE) ───────────────
+// ── PROCESSADOR DE RUÍDO ESTÁTICO OTIMIZADO (ESTABILIZAÇÃO DO TICKER) ──
 function generateNoise() {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   const tv = document.getElementById('tvNoise');
   if (!tv || !ctx) return;
 
-  canvas.width = 140; canvas.height = 140;
+  // Resolução reduzida para performance leve em qualquer nível de zoom
+  canvas.width = 120; 
+  canvas.height = 120;
+  
   const imgData = ctx.createImageData(canvas.width, canvas.height);
   const buffer = new Uint32Array(imgData.data.buffer);
 
-  function noiseLoop() {
+  // CRUCIAL: Criamos um cache pré-renderizado para o navegador não recalcular dados do zero a cada milissegundo
+  const noiseFrames = [];
+  for (let f = 0; f < 6; f++) { // Gera apenas 6 frames de chiado estático fixos
     for (let i = 0; i < buffer.length; i++) {
-      if (Math.random() > 0.5) buffer[i] = 0xffffffff;
-      else buffer[i] = 0xff000000;
+      buffer[i] = Math.random() > 0.5 ? 0xffffffff : 0xff000000;
     }
     ctx.putImageData(imgData, 0, 0);
-    tv.style.backgroundImage = `url(${canvas.toDataURL()})`;
+    noiseFrames.push(canvas.toDataURL());
+  }
+
+  let frameIndex = 0;
+  let lastUpdate = 0;
+
+  function noiseLoop(timestamp) {
+    // LIMITADOR DE FPS: Atualiza o chiado a cada 45ms em vez de sobrecarregar a cada 1ms
+    if (timestamp - lastUpdate > 45) {
+      tv.style.backgroundImage = `url(${noiseFrames[frameIndex]})`;
+      frameIndex = (frameIndex + 1) % noiseFrames.length;
+      lastUpdate = timestamp;
+    }
     requestAnimationFrame(noiseLoop);
   }
-  noiseLoop();
+  
+  requestAnimationFrame(noiseLoop);
 }
-
 // ── SISTEMA DE CARREGAMENTO DINÂMICO (LOAD MORE) ───────────
 const loadMoreBtn = document.getElementById('loadMore');
 const recentsList = document.getElementById('recentsList');
