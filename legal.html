@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentos Legais — Clipes Ocultos</title>
+  <meta name="robots" content="noindex, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Estilos específicos e robustos para a área Legal — Blindados contra Zoom */
+    .legal-wrapper {
+      padding: 120px 20px 80px 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .legal-container {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 40px;
+      box-sizing: border-box;
+    }
+    .legal-sidebar {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      background: var(--glass, rgba(14, 21, 32, 0.72));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border, rgba(255, 255, 255, 0.055));
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .legal-sidebar h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    .legal-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .legal-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 12px 16px;
+      text-align: left;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .legal-tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .legal-tab-btn.active {
+      color: var(--bg);
+      background: var(--accent, #e8ff3c);
+      box-shadow: 0 0 15px var(--accent-glow, rgba(232, 255, 60, 0.35));
+    }
+    .legal-content-box {
+      background: var(--glass, rgba(14, 21, 32, 0.72));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border, rgba(255, 255, 255, 0.055));
+      border-radius: 16px;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+    .legal-tab-content {
+      display: none;
+      animation: fadeInLegal 0.4s ease forwards;
+    }
+    .legal-tab-content.active {
+      display: block;
+    }
+    .legal-tab-content h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .legal-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent, #e8ff3c);
+      margin-bottom: 30px;
+      display: block;
+    }
+    .legal-text {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .legal-text h3 {
+      font-family: 'Syne', sans-serif;
+      color: #ffffff;
+      font-size: 1.2rem;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    .legal-text p {
+      margin-bottom: 16px;
+    }
+    .legal-text ul {
+      margin-left: 20px;
+      margin-bottom: 16px;
+      list-style-type: square;
+    }
+    .legal-text li {
+      margin-bottom: 8px;
+    }
+    .highlight-box {
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 3px solid var(--accent2, #ff3c6e);
+      padding: 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    @keyframes fadeInLegal {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 768px) {
+      .legal-container { grid-template-columns: 1fr; gap: 20px; }
+      .legal-sidebar { position: static; width: 100%; }
+      .legal-content-box { padding: 24px; }
+      .legal-tab-content h1 { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="main-site">
+    <nav id="navbar" class="scrolled">
+      <div class="nav-container">
+        <a href="index.html" class="nav-logo">
+          <span class="eye-icon-sm">◉</span>
+          <span>CLIPES <strong>OCULTOS</strong></span>
+        </a>
+        <div class="nav-links">
+          <a href="index.html#inicio">Início</a>
+          <a href="index.html#categorias">Categorias</a>
+          <a href="index.html#em-alta">Em Alta</a>
+          <a href="index.html#recentes">Recentes</a>
+          <a href="index.html#sobre">Sobre</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="legal-wrapper">
+      <div class="legal-container">
+        
+        <aside class="legal-sidebar">
+          <h2>ARQUIVOS LEGAIS</h2>
+          <nav class="legal-nav">
+            <button class="legal-tab-btn active" data-tab="privacidade"><span>◉</span> Privacidade</button>
+            <button class="legal-tab-btn" data-tab="termos"><span>◉</span> Termos de Uso</button>
+            <button class="legal-tab-btn" data-tab="dmca"><span>◉</span> DMCA Copyright</button>
+          </nav>
+        </aside>
+
+        <article class="legal-content-box">
+          
+          <div class="legal-tab-content active" id="privacidade">
+            <h1>Política de Privacidade</h1>
+            <span class="legal-date">ÚLTIMA ATUALIZAÇÃO: JUNHO DE 2026</span>
+            <div class="legal-text">
+              <p>A sua privacidade é de extrema importância para o projeto <strong>Clipes Ocultos</strong>. Esta declaração detalha quais informações coletamos, como as tratamos e os mecanismos de segurança aplicados para manter o seu anonimato salvaguardado.</p>
+              
+              <h3>1. Coleta de Informações</h3>
+              <p>Operamos sob o princípio da minimização de dados. Não exigimos cadastro de contas nominais para navegação básica do ecossistema. As informações coletadas limitam-se a:</p>
+              <ul>
+                <li><strong>Dados de Interação em Tempo Real:</strong> Contadores agregados de interações síncronas (likes, dislikes e visualizações) processados via infraestrutura de banco de dados para sincronização global.</li>
+                <li><strong>Comentários da Comunidade:</strong> Qualquer codinome ou texto voluntariamente submetido na central de discussões de clipes.</li>
+              </ul>
+
+              <h3>2. Processamento e Logs</h3>
+              <p>As métricas de presença ("assistindo agora") utilizam conexões de persistência volátil. Quando a sua sessão é encerrada ou a aba do navegador é fechada, o identificador temporário é automaticamente expurgado da árvore de dados através de gatilhos automáticos de desconexão.</p>
+
+              <h3>3. Cookies e Rastreamento</h3>
+              <p>Este site não utiliza rastreadores invasivos de comportamento mercadológico ou pixel de redes corporativas. Os cookies utilizados servem puramente para manter preferências locais de renderização e integridade estrutural das requisições.</p>
+            </div>
+          </div>
+
+          <div class="legal-tab-content" id="termos">
+            <h1>Termos de Uso</h1>
+            <span class="legal-date">ÚLTIMA ATUALIZAÇÃO: JUNHO DE 2026</span>
+            <div class="legal-text">
+              <p>Ao adentrar e consumir o acervo disponibilizado pelo <strong>Clipes Ocultos</strong>, você concorda e submete-se de forma integral às cláusulas operacionais dispostas nestes Termos de Uso.</p>
+              
+              <h3>1. Natureza do Serviço</h3>
+              <p>O Clipes Ocultos funciona como uma plataforma de indexação, catálogo, arquivo histórico e curadoria independente de arquivos multimídia dispersos ou ocultados da rede mundial. O acesso é estritamente pessoal, recreativo e de cunho documental.</p>
+
+              <div class="highlight-box">
+                <strong>Aviso de Isenção de Responsabilidade:</strong> O conteúdo apresentado reflete gravações raras, registros de radioamadores, feeds interceptados e curiosidades visuais. O projeto não valida, endossa ou assume responsabilidade pelas teorias ou veracidade dos fatos expressos nos vídeos de terceiros.
+              </div>
+
+              <h3>2. Conduta de Comunicação</h3>
+              <p>Ao utilizar o formulário de comentários acoplado aos players, é expressamente proibido:</p>
+              <ul>
+                <li>Injetar scripts maliciosos, payloads estruturados (XSS) ou tentativas de engenharia reversa nas conexões do banco de dados.</li>
+                <li>Propagar spambots, links afiliados ou publicidade não autorizada.</li>
+              </ul>
+
+              <h3>3. Modificações de Infraestrutura</h3>
+              <p>Reservamo-nos o direito de alterar, suspender ou descontinuar qualquer repositório de vídeo ou recurso dinâmico sem aviso prévio, visando a segurança da integridade do sistema.</p>
+            </div>
+          </div>
+
+          <div class="legal-tab-content" id="dmca">
+            <h1>Política de DMCA e Copyright</h1>
+            <span class="legal-date">ÚLTIMA ATUALIZAÇÃO: JUNHO DE 2026</span>
+            <div class="legal-text">
+              <p>O projeto <strong>Clipes Ocultos</strong> respeita rigorosamente a propriedade intelectual e opera em conformidade com as diretrizes do <em>Digital Millennium Copyright Act</em> ("DMCA") e legislações correlatas de direitos autorais.</p>
+              
+              <h3>1. Notificação de Infração</h3>
+              <p>Se você for o detentor legal de direitos autorais ou o representante legal de um material catalogado em nossa curadoria e deseja solicitar a remoção do índice, envie uma contra-notificação formal contendo:</p>
+              <ul>
+                <li>Assinatura física ou eletrônica da pessoa autorizada a agir em nome do proprietário do direito autoral exclusivo.</li>
+                <li>Identificação precisa do link ou identificador do vídeo (ex: Código v1, v2) que alega estar sendo infringido.</li>
+                <li>Informações de contato direto, incluindo endereço eletrônico (e-mail) válido.</li>
+              </ul>
+
+              <h3>2. Procedimento de Remoção</h3>
+              <p>Após o recebimento e validação de uma notificação legítima de infração, o protocolo do projeto determina a remoção imediata e a exclusão permanente das referências de arquivo nos nossos servidores de dados em um prazo máximo de 48 horas.</p>
+
+              <h3>3. Canal de Contato Directo</h3>
+              <p>Para o envio de requisições relativas a direitos autorais, utilize o e-mail de conformidade técnica: <em style="color: var(--accent2);">dmca@clipesocultos-premium.com</em>.</p>
+            </div>
+          </div>
+
+        </article>
+
+      </div>
+    </main>
+
+    <footer class="footer">
