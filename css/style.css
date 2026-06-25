@@ -723,7 +723,7 @@ body::before {
 .tv-leg-r { right: 28%; }
 
 /* ════════════════════════════════════════════════════
-   TICKER
+   TICKER (Corrigido: Sem tremores e velocidade lenta)
 ════════════════════════════════════════════════════ */
 .ticker-wrap {
   overflow: hidden;
@@ -731,6 +731,7 @@ body::before {
   padding: 11px 0;
   border-top: 1px solid rgba(0,0,0,0.15);
   position: relative;
+  width: 100%;
 }
 .ticker-wrap::before,
 .ticker-wrap::after {
@@ -742,14 +743,15 @@ body::before {
   pointer-events: none;
 }
 .ticker-wrap::before { left: 0; background: linear-gradient(90deg, var(--accent), transparent); }
-.ticker-wrap::after  { right: 0; background: linear-gradient(-90deg, #c8e020, transparent); }
+.ticker-wrap::after  { right: 0; background: linear-gradient(-90deg, var(--accent), transparent); } /* Ajustado para manter a transição invisível nas pontas */
 
 .ticker-track {
   display: flex;
-  gap: 44px;
   white-space: nowrap;
-  animation: ticker 32s linear infinite;
   width: max-content;
+  /* Aumentamos o tempo para 45s para passar de forma lenta e luxuosa. */
+  animation: tickerFixed 45s linear infinite; 
+  will-change: transform; /* Força o navegador a preparar estabilização de movimento */
 }
 .ticker-track span {
   font-family: var(--font-mono);
@@ -758,12 +760,18 @@ body::before {
   color: #000;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  padding: 0 22px; /* Transferido o gap para paddings laterais, garantindo tamanho de bloco idêntico */
 }
 
+/* Animação usando aceleração de hardware 3D (Z-axis em 0) para remover qualquer tremor visual */
+@keyframes tickerFixed {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-33.333%, 0, 0); /* Move perfeitamente com base nas repetições do HTML */
+  }
+}
 /* ════════════════════════════════════════════════════
    SECTIONS
 ════════════════════════════════════════════════════ */
