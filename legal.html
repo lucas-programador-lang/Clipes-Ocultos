@@ -254,3 +254,37 @@
     </main>
 
     <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>© 2025 Clipes Ocultos · Todos os direitos reservados.</p>
+          <p class="footer-credit">Feito com 👁️ no Brasil</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.legal-tab-btn');
+      const contents = document.querySelectorAll('.legal-tab-content');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.getAttribute('data-tab');
+
+          tabs.forEach(t => t.classList.remove('active'));
+          contents.forEach(c => c.classList.remove('active'));
+
+          tab.classList.add('active');
+          document.getElementById(targetTab).classList.add('active');
+
+          // Rola suavemente para o topo do conteúdo no mobile ao trocar de aba
+          if (window.innerWidth <= 768) {
+            document.querySelector('.legal-content-box').scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
