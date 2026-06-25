@@ -263,27 +263,78 @@
     </footer>
   </div>
 
-  <script>
+ <script>
     document.addEventListener('DOMContentLoaded', () => {
       const tabs = document.querySelectorAll('.legal-tab-btn');
       const contents = document.querySelectorAll('.legal-tab-content');
 
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          const targetTab = tab.getAttribute('data-tab');
+      // 1. Função base para alternar as abas visualmente
+      function switchTab(targetTabId) {
+        if (!targetTabId) return;
+        
+        const targetButton = document.querySelector(`.legal-tab-btn[data-tab="${targetTabId}"]`);
+        const targetContent = document.getElementById(targetTabId);
 
+        if (targetButton && targetContent) {
+          // Remove classes ativas de todos
           tabs.forEach(t => t.classList.remove('active'));
           contents.forEach(c => c.classList.remove('active'));
 
-          tab.classList.add('active');
-          document.getElementById(targetTab).classList.add('active');
+          // Adiciona à aba correta
+          targetButton.classList.add('active');
+          targetContent.classList.add('active');
+        }
+      }
 
-          // Rola suavemente para o topo do conteúdo no mobile ao trocar de aba
+      // 2. Função para ler o parâmetro '?tab=' da URL atual
+      function checkUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        
+        if (tabParam) {
+          switchTab(tabParam);
+          // Rola suavemente até a caixa de texto para dar foco visual
+          setTimeout(() => {
+            document.querySelector('.legal-content-box')?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        } else {
+          // Caso não tenha parâmetro na URL, força a aba privacidade como padrão
+          switchTab('privacidade');
+        }
+      }
+
+      // 3. Escuta os cliques manuais nos botões da barra lateral (Navegação local)
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.getAttribute('data-tab');
+          switchTab(targetTab);
+
+          // Atualiza a barra de endereço sem dar F5
+          const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?tab=' + targetTab;
+          window.history.pushState({ path: newUrl }, '', newUrl);
+
           if (window.innerWidth <= 768) {
-            document.querySelector('.legal-content-box').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.legal-content-box')?.scrollIntoView({ behavior: 'smooth' });
           }
         });
       });
+
+      // 4. Intercepta cliques caso o usuário clique nos links do rodapé estando JÁ DENTRO da legal.html
+      document.body.addEventListener('click', (e) => {
+        const anchor = e.target.closest('a');
+        if (anchor && anchor.getAttribute('href') && anchor.getAttribute('href').includes('legal.html?tab=')) {
+          const urlTarget = new URL(anchor.href);
+          const tabParam = urlTarget.searchParams.get('tab');
+          
+          if (tabParam) {
+            switchTab(tabParam);
+            document.querySelector('.legal-content-box')?.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+
+      // 5. CORREÇÃO CRUCIAL: Executa a checagem imediatamente ao carregar a página
+      checkUrlParams();
     });
   </script>
 </body>
