@@ -351,7 +351,8 @@ body::before {
   overflow: hidden;
   transition: height 0.32s var(--ease);
 }
-.search-bar.open { height: 58px; }
+.search-bar.open,
+.search-bar.active { height: 58px; }
 .search-bar input {
   flex: 1;
   background: none; border: none; outline: none;
@@ -1942,4 +1943,178 @@ body::before {
 #commentsContainer::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--accent), var(--accent2)) !important; /* Degradê Amarelo para Rosa */
   border-radius: 4px !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   ADIÇÕES — v3 (correções, player, responsividade)
+══════════════════════════════════════════════════════ */
+
+/* Estado vazio de busca */
+.empty-state {
+  text-align: center;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 40px 0;
+}
+
+/* Acessibilidade de foco por teclado nos cartões clicáveis */
+.video-card:focus-visible,
+.recent-item:focus-visible,
+.cat-card:focus-visible,
+#heroFeaturedBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Selo "Em Alta" quando ultrapassa o limite de visualizações */
+.trending-badge-fire {
+  background: linear-gradient(135deg, var(--accent2), #ff7a3c);
+  box-shadow: 0 0 14px rgba(255, 60, 110, 0.5);
+}
+
+/* ── BARRA DE FERRAMENTAS DO PLAYER (qualidade + tela cheia) ── */
+.player-toolbar {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.player-toolbar-group,
+.btn-fullscreen {
+  pointer-events: auto;
+}
+.player-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(5, 7, 9, 0.72);
+  border: 1px solid var(--border2);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+.player-toolbar-group label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.player-toolbar-group select {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.player-toolbar-group select:focus { outline: none; }
+.player-toolbar-group select option { background: var(--surface); color: var(--text); }
+
+.btn-fullscreen {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(5, 7, 9, 0.72);
+  border: 1px solid var(--border2);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: all 0.25s var(--ease);
+}
+.btn-fullscreen:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 14px rgba(232, 255, 60, 0.2);
+}
+.btn-fullscreen span { display: none; }
+@media (min-width: 560px) {
+  .btn-fullscreen span { display: inline; }
+}
+
+/* ── COMENTÁRIOS: dica e estado vazio ── */
+.comments-hint {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text3);
+  margin: -10px 0 16px;
+}
+.comments-empty {
+  opacity: 0.5;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+}
+.comment-item + .comment-item { margin-top: 12px; }
+.comment-item {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.comment-item:last-child { border-bottom: none; }
+.comment-meta {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+.comment-meta strong { color: var(--accent); }
+.comment-meta span { color: var(--text3); font-family: var(--font-mono); font-size: 0.72rem; }
+.comment-body { color: var(--text4); font-size: 0.88rem; line-height: 1.55; word-break: break-word; }
+
+/* ── Pulso ao curtir/descurtir ── */
+@keyframes pulseOnce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.pulse-once { animation: pulseOnce 0.32s var(--ease-bounce); }
+
+/* ── Data de publicação no lugar do falso "assistindo agora" ── */
+#publishDateChip { cursor: help; }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVIDADE — TELAS GRANDES (desktop wide)
+══════════════════════════════════════════════════════ */
+@media (min-width: 1440px) {
+  .container { max-width: 1400px; }
+  .videos-grid { gap: 22px; }
+  .recents-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .recent-item { flex-direction: column; }
+  .recent-thumb { width: 100%; min-width: auto; aspect-ratio: 16/9; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVIDADE — AJUSTES FINOS MOBILE (player)
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .player-toolbar {
+    bottom: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+  .player-toolbar-group { padding: 5px 9px; }
+  .player-toolbar-group label { display: none; }
+  .btn-fullscreen { padding: 7px 10px; }
+  .comment-form { flex-direction: column; }
+  #commentUser, #commentText { width: 100%; }
+  .video-realtime-bar { gap: 12px; }
+}
+
+@media (max-width: 400px) {
+  .premium-like-btn .like-text,
+  .premium-dislike-btn .dislike-text { display: none; }
 }
