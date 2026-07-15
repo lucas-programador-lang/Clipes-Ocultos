@@ -256,7 +256,7 @@
     <footer class="footer">
       <div class="container">
         <div class="footer-bottom">
-          <p>© 2025 Clipes Ocultos · Todos os direitos reservados.</p>
+          <p>© <span id="copyYear">2026</span> Clipes Ocultos · Todos os direitos reservados.</p>
           <p class="footer-credit">Feito com 👁️ no Brasil</p>
         </div>
       </div>
@@ -335,6 +335,10 @@
 
       // 5. CORREÇÃO CRUCIAL: Executa a checagem imediatamente ao carregar a página
       checkUrlParams();
+
+      // 6. Mantém o ano do rodapé sempre atualizado
+      const copyYearEl = document.getElementById('copyYear');
+      if (copyYearEl) copyYearEl.textContent = String(new Date().getFullYear());
     });
   </script>
 </body>
